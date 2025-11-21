@@ -106,6 +106,19 @@ ESP32 DevKit V1 Pin Layout:
                      └─────────────┘
 ```
 
+## Power Distribution
+
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│  External   │    │    L298N     │    │ Power Rails │
+│ Power Supply│    │ Motor Driver │    │             │
+│             │    │              │    │             │
+│ 7-12V ──────┼────┤ VIN    +5V ──┼────┤ 5V (ESP32)  │
+│ GND ────────┼────┤ GND    GND ──┼────┤ GND (Common)│
+│             │    │              │    │ 5V (Sensors)│
+└─────────────┘    └──────────────┘    └─────────────┘
+```
+
 ## Wiring Diagram
 
 ```
@@ -120,9 +133,11 @@ ESP32 DevKit V1 Pin Layout:
 │ GPIO25 ─────┼────┤IN4      OUT4├────┤ Motor2 (-)  │
 │ GPIO32 ─────┼────┤ENB           │    │             │
 │             │    │              │    │             │
-│ 5V ─────────┼────┤VCC           │    └─────────────┘
+│ 5V ←────────┼────┤+5V           │    └─────────────┘
 │ GND ────────┼────┤GND           │
-└─────────────┘    └──────────────┘
+└─────────────┘    │              │
+                   │ VCC ←── 7-12V │ (External Power)
+                   └──────────────┘
 
 ┌─────────────┐    ┌──────────────┐
 │   ESP32     │    │   HC-SR04    │
@@ -262,7 +277,8 @@ Movement Types:
 
 1. **Hardware Assembly**:
    - Connect components according to wiring diagram
-   - Ensure proper power supply (5V for motors, 3.3V for ESP32)
+   - Use external power supply (7-12V for motors)
+   - ESP32 powered via L298N 5V regulator output
    - Mount ultrasonic sensor facing forward
 
 2. **Software Setup**:
@@ -299,13 +315,16 @@ Movement Types:
 
 **Motors Not Responding**:
 - Check L298N connections
-- Verify power supply voltage
+- Verify external power supply (7-12V)
+- Ensure L298N VCC connected to external power
+- Check ESP32 5V connection from L298N +5V output
 - Test motor driver enable pins
 
 **Obstacle Detection Issues**:
 - Clean ultrasonic sensor
 - Check trigger/echo connections
-- Verify 5V power supply
+- Verify 5V power supply from ESP32 to HC-SR04
+- Ensure L298N is providing stable 5V output
 
 **Radio Communication Problems**:
 - Check APC220 wiring
@@ -327,8 +346,9 @@ Movement Types:
 | **Radio Range** | Up to 1000m (APC220) |
 | **GPS Accuracy** | 2.5m CEP (NEO-M8N) |
 | **Detection Range** | 2-400cm (HC-SR04) |
-| **Motor Voltage** | 3-6V DC |
-| **Operating Current** | ~500mA (total) |
+| **Motor Voltage** | 6-12V DC |
+| **Logic Voltage** | 5V (from L298N) |
+| **Operating Current** | ~1A (total) |
 | **Control Interface** | Web Browser |
 | **Update Rate** | 1Hz (telemetry) |
 
