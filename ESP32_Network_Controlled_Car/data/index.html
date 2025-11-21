@@ -4,88 +4,224 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ESP32 Motor Car Control</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚗%3C/text%3E%3C/svg%3E">
 </head>
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>Connecting to ESP32...</p>
+  </div>
+  
   <header class="header">
-    <h1>ESP32 Motor Car Control</h1>
+    <div class="header-content">
+      <div class="logo">
+        <span class="car-icon">🚗</span>
+        <h1>ESP32 Motor Car</h1>
+      </div>
+      <div class="connection-status" id="connectionStatus">
+        <span class="status-dot offline"></span>
+        <span class="status-text">Offline</span>
+      </div>
+    </div>
   </header>
 
   <main class="container">
-    <section class="control-section">
-      <div class="card">
-        <h2>Movement Controls</h2>
-        <div class="movement-grid">
-          <button class="button" onclick="moveForward()">FORWARD</button>
-          <div class="side-controls">
-            <button class="button" onclick="moveLeft()">LEFT</button>
-            <button class="button stop-btn" onclick="stopRobot()">STOP</button>
-            <button class="button" onclick="moveRight()">RIGHT</button>
+    <div class="dashboard-grid">
+      <section class="control-section">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2><span class="icon">🎮</span> Movement Controls</h2>
+            <div class="control-mode-toggle">
+              <button class="mode-btn active" data-mode="manual">Manual</button>
+              <button class="mode-btn" data-mode="auto">Auto</button>
+            </div>
           </div>
-          <button class="button" onclick="moveReverse()">REVERSE</button>
+          
+          <div class="movement-container">
+            <div class="movement-grid">
+              <button class="control-btn forward-btn" data-direction="forward">
+                <span class="btn-icon">⬆️</span>
+                <span class="btn-text">FORWARD</span>
+                <div class="btn-glow"></div>
+              </button>
+              
+              <div class="side-controls">
+                <button class="control-btn left-btn" data-direction="left">
+                  <span class="btn-icon">⬅️</span>
+                  <span class="btn-text">LEFT</span>
+                  <div class="btn-glow"></div>
+                </button>
+                
+                <button class="control-btn stop-btn" data-direction="stop">
+                  <span class="btn-icon">⏹️</span>
+                  <span class="btn-text">STOP</span>
+                  <div class="btn-glow"></div>
+                </button>
+                
+                <button class="control-btn right-btn" data-direction="right">
+                  <span class="btn-icon">➡️</span>
+                  <span class="btn-text">RIGHT</span>
+                  <div class="btn-glow"></div>
+                </button>
+              </div>
+              
+              <button class="control-btn reverse-btn" data-direction="reverse">
+                <span class="btn-icon">⬇️</span>
+                <span class="btn-text">REVERSE</span>
+                <div class="btn-glow"></div>
+              </button>
+            </div>
+            
+            <div class="speed-control">
+              <div class="speed-header">
+                <label>Motor Speed</label>
+                <span class="speed-value" id="motorSpeed">0%</span>
+              </div>
+              <div class="slider-container">
+                <input type="range" min="0" max="100" step="25" id="motorSlider" value="0"/>
+                <div class="slider-track"></div>
+                <div class="speed-markers">
+                  <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div class="speed-control">
-          <label>Motor Speed: <span id="motorSpeed">0</span>%</label>
-          <input type="range" min="0" max="100" step="25" id="motorSlider" oninput="updateMotorSpeed(this.value)" value="0"/>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="communication-section">
-      <div class="card">
-        <h2>Radio Communication</h2>
-        <div class="radio-controls">
-          <input type="text" id="radioInput" placeholder="Enter message" class="radio-input">
-          <button class="button" onclick="sendRadioMessage()">SEND</button>
+      <section class="communication-section">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2><span class="icon">📡</span> Radio Communication</h2>
+            <div class="signal-strength" id="signalStrength">
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+              <div class="signal-bar"></div>
+            </div>
+          </div>
+          
+          <div class="radio-container">
+            <div class="message-history" id="messageHistory">
+              <div class="message received">
+                <span class="message-time">12:34</span>
+                <span class="message-text">System ready</span>
+              </div>
+            </div>
+            
+            <div class="radio-controls">
+              <div class="input-group">
+                <input type="text" id="radioInput" placeholder="Type your message..." class="radio-input">
+                <button class="send-btn" id="sendBtn">
+                  <span class="send-icon">📤</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="telemetry-section">
-      <div class="card">
-        <h2>Live Telemetry</h2>
-        <div class="telemetry-grid">
-          <div class="telemetry-item">
-            <span class="label">Distance:</span>
-            <span id="distance" class="value">--</span> cm
+      <section class="telemetry-section">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2><span class="icon">📊</span> Live Telemetry</h2>
+            <div class="refresh-indicator" id="refreshIndicator"></div>
           </div>
-          <div class="telemetry-item">
-            <span class="label">WiFi Signal:</span>
-            <span id="wifiSignal" class="value">--</span> dBm
-          </div>
-          <div class="telemetry-item">
-            <span class="label">Radio Status:</span>
-            <span id="radioStatus" class="value">--</span>
+          
+          <div class="telemetry-grid">
+            <div class="telemetry-item">
+              <div class="telemetry-icon">📏</div>
+              <div class="telemetry-content">
+                <span class="telemetry-label">Distance</span>
+                <span class="telemetry-value" id="distance">--</span>
+                <span class="telemetry-unit">cm</span>
+              </div>
+              <div class="telemetry-chart" id="distanceChart"></div>
+            </div>
+            
+            <div class="telemetry-item">
+              <div class="telemetry-icon">📶</div>
+              <div class="telemetry-content">
+                <span class="telemetry-label">WiFi Signal</span>
+                <span class="telemetry-value" id="wifiSignal">--</span>
+                <span class="telemetry-unit">dBm</span>
+              </div>
+              <div class="signal-bars" id="wifiSignalBars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="gps-section">
-      <div class="card">
-        <h2>GPS Location</h2>
-        <div class="gps-grid">
-          <div class="gps-item">
-            <span class="label">Latitude:</span>
-            <span id="gpsLat" class="value">--</span>
+      <section class="gps-section">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2><span class="icon">🛰️</span> GPS Location</h2>
+            <div class="gps-status" id="gpsStatusIndicator">
+              <span class="status-dot"></span>
+              <span class="status-text" id="gpsStatus">No Fix</span>
+            </div>
           </div>
-          <div class="gps-item">
-            <span class="label">Longitude:</span>
-            <span id="gpsLon" class="value">--</span>
-          </div>
-          <div class="gps-item">
-            <span class="label">Satellites:</span>
-            <span id="gpsSats" class="value">--</span>
-          </div>
-          <div class="gps-item">
-            <span class="label">Status:</span>
-            <span id="gpsStatus" class="value">--</span>
+          
+          <div class="gps-container">
+            <div class="coordinates-display">
+              <div class="coordinate-item">
+                <div class="coord-icon">🌐</div>
+                <div class="coord-content">
+                  <span class="coord-label">Latitude</span>
+                  <span class="coord-value" id="gpsLat">--</span>
+                </div>
+              </div>
+              
+              <div class="coordinate-item">
+                <div class="coord-icon">🌍</div>
+                <div class="coord-content">
+                  <span class="coord-label">Longitude</span>
+                  <span class="coord-value" id="gpsLon">--</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="satellite-info">
+              <div class="satellite-count">
+                <span class="sat-icon">🛰️</span>
+                <span class="sat-count" id="gpsSats">0</span>
+                <span class="sat-label">Satellites</span>
+              </div>
+              
+              <div class="satellite-visual" id="satelliteVisual">
+                <!-- Satellite indicators will be generated by JS -->
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
+  <div class="keyboard-help" id="keyboardHelp">
+    <div class="help-content">
+      <h3>Keyboard Controls</h3>
+      <div class="key-mappings">
+        <div class="key-item"><kbd>W</kbd> or <kbd>↑</kbd> Forward</div>
+        <div class="key-item"><kbd>S</kbd> or <kbd>↓</kbd> Reverse</div>
+        <div class="key-item"><kbd>A</kbd> or <kbd>←</kbd> Left</div>
+        <div class="key-item"><kbd>D</kbd> or <kbd>→</kbd> Right</div>
+        <div class="key-item"><kbd>Space</kbd> Stop</div>
+        <div class="key-item"><kbd>Enter</kbd> Send Message</div>
+      </div>
+      <button class="close-help" onclick="toggleKeyboardHelp()">×</button>
+    </div>
+  </div>
+  
+  <button class="help-toggle" onclick="toggleKeyboardHelp()" title="Keyboard shortcuts">
+    <span>⌨️</span>
+  </button>
+  
   <script src="script.js"></script>
 </body>
 </html>
