@@ -132,7 +132,8 @@ void looped() {
 #include <WiFi.h>
 #include <WebServer.h>
 #include <HardwareSerial.h>
-#include <SoftwareSerial.h>
+#include <LittleFS.h>
+#define SPIFFS LittleFS
 
 // Replace with your network credentials
 const char* ssid     = "D.S CE 3";
@@ -247,85 +248,7 @@ void handleRadioData() {
   }
 }
 
-void handleRoot() {
-  const char html[] PROGMEM = R"rawliteral(
-  <!DOCTYPE HTML><html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:,">
-    <style>
-      html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; }
-      .button { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #4CAF50; border: none; color: white; padding: 12px 28px; text-decoration: none; font-size: 26px; margin: 1px; cursor: pointer; }
-      .button2 {background-color: #555555;}
-    </style>
-    <script>
-      function moveForward() { fetch('/forward'); }
-      function moveLeft() { fetch('/left'); }
-      function stopRobot() { fetch('/stop'); }
-      function moveRight() { fetch('/right'); }
-      function moveReverse() { fetch('/reverse'); }
 
-      function updateMotorSpeed(pos) {
-        document.getElementById('motorSpeed').innerHTML = pos;
-        fetch(`/speed?value=${pos}`);
-      }
-
-      function sendRadioMessage() {
-        const msg = document.getElementById('radioInput').value;
-        fetch(`/radio?msg=${encodeURIComponent(msg)}`);
-        document.getElementById('radioInput').value = '';
-      }
-
-      function updateTelemetry() {
-        fetch('/telemetry')
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('distance').innerHTML = data.distance;
-            document.getElementById('wifiSignal').innerHTML = data.wifi;
-            document.getElementById('radioStatus').innerHTML = data.radio;
-            document.getElementById('gpsLat').innerHTML = data.latitude;
-            document.getElementById('gpsLon').innerHTML = data.longitude;
-            document.getElementById('gpsSats').innerHTML = data.satellites;
-            document.getElementById('gpsStatus').innerHTML = data.gpsStatus;
-          });
-      }
-
-      setInterval(updateTelemetry, 1000);
-    </script>
-  </head>
-  <body>
-    <h1>ESP32 Motor Control</h1>
-    <p><button class="button" onclick="moveForward()">FORWARD</button></p>
-    <div style="clear: both;">
-      <p>
-        <button class="button" onclick="moveLeft()">LEFT</button>
-        <button class="button button2" onclick="stopRobot()">STOP</button>
-        <button class="button" onclick="moveRight()">RIGHT</button>
-      </p>
-    </div>
-    <p><button class="button" onclick="moveReverse()">REVERSE</button></p>
-    <p>Motor Speed: <span id="motorSpeed">0</span></p>
-    <input type="range" min="0" max="100" step="25" id="motorSlider" oninput="updateMotorSpeed(this.value)" value="0"/>
-    
-    <hr>
-    <h2>Radio Communication</h2>
-    <input type="text" id="radioInput" placeholder="Enter message" style="padding: 8px; font-size: 16px;">
-    <button class="button" onclick="sendRadioMessage()">SEND</button>
-    
-    <h2>Telemetry</h2>
-    <p>Distance: <span id="distance">--</span> cm</p>
-    <p>WiFi Signal: <span id="wifiSignal">--</span> dBm</p>
-    <p>Radio Status: <span id="radioStatus">--</span></p>
-    
-    <h2>GPS Location</h2>
-    <p>Latitude: <span id="gpsLat">--</span></p>
-    <p>Longitude: <span id="gpsLon">--</span></p>
-    <p>Satellites: <span id="gpsSats">--</span></p>
-    <p>Status: <span id="gpsStatus">--</span></p>
-  </body>
-  </html>)rawliteral";
-  server.send(200, "text/html", html);
-}
 
 void handleForward() {
   float distance = getDistance();
@@ -439,6 +362,11 @@ void setup() {
   radioSerial.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
   gpsSerial.begin(9600, SERIAL_8N1, 4, 2); // RX=4, TX=2
 
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS Mount Failed");
+    return;
+  }
+
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
@@ -469,8 +397,12 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // Define routes
-  server.on("/", handleRoot);
+  // Serve static files
+  server.serveStatic("/", SPIFFS, "/index.html");
+  server.serveStatic("/style.css", SPIFFS, "/style.css");
+  server.serveStatic("/script.js", SPIFFS, "/script.js");
+
+  // Define API routes
   server.on("/forward", handleForward);
   server.on("/left", handleLeft);
   server.on("/stop", handleStop);

@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 Motor Car Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <h1>ESP32 Motor Car Control</h1>
+  </header>
+
+  <main class="container">
+    <section class="control-section">
+      <div class="card">
+        <h2>Movement Controls</h2>
+        <div class="movement-grid">
+          <button class="button" onclick="moveForward()">FORWARD</button>
+          <div class="side-controls">
+            <button class="button" onclick="moveLeft()">LEFT</button>
+            <button class="button stop-btn" onclick="stopRobot()">STOP</button>
+            <button class="button" onclick="moveRight()">RIGHT</button>
+          </div>
+          <button class="button" onclick="moveReverse()">REVERSE</button>
+        </div>
+        
+        <div class="speed-control">
+          <label>Motor Speed: <span id="motorSpeed">0</span>%</label>
+          <input type="range" min="0" max="100" step="25" id="motorSlider" oninput="updateMotorSpeed(this.value)" value="0"/>
+        </div>
+      </div>
+    </section>
+
+    <section class="communication-section">
+      <div class="card">
+        <h2>Radio Communication</h2>
+        <div class="radio-controls">
+          <input type="text" id="radioInput" placeholder="Enter message" class="radio-input">
+          <button class="button" onclick="sendRadioMessage()">SEND</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="telemetry-section">
+      <div class="card">
+        <h2>Live Telemetry</h2>
+        <div class="telemetry-grid">
+          <div class="telemetry-item">
+            <span class="label">Distance:</span>
+            <span id="distance" class="value">--</span> cm
+          </div>
+          <div class="telemetry-item">
+            <span class="label">WiFi Signal:</span>
+            <span id="wifiSignal" class="value">--</span> dBm
+          </div>
+          <div class="telemetry-item">
+            <span class="label">Radio Status:</span>
+            <span id="radioStatus" class="value">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gps-section">
+      <div class="card">
+        <h2>GPS Location</h2>
+        <div class="gps-grid">
+          <div class="gps-item">
+            <span class="label">Latitude:</span>
+            <span id="gpsLat" class="value">--</span>
+          </div>
+          <div class="gps-item">
+            <span class="label">Longitude:</span>
+            <span id="gpsLon" class="value">--</span>
+          </div>
+          <div class="gps-item">
+            <span class="label">Satellites:</span>
+            <span id="gpsSats" class="value">--</span>
+          </div>
+          <div class="gps-item">
+            <span class="label">Status:</span>
+            <span id="gpsStatus" class="value">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

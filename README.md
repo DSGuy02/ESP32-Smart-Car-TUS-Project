@@ -4,12 +4,15 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 
 ## Features
 
-- **WiFi Control**: Web-based interface for remote control
+- **Modern Web Interface**: Professional filesystem-based UI with dark theme
+- **WiFi Control**: Responsive web-based interface for remote control
+- **Keyboard Controls**: WASD/Arrow keys + Spacebar for quick control
 - **Obstacle Detection**: Ultrasonic sensor prevents collisions
 - **Radio Communication**: APC220 module for long-range messaging
 - **GPS Tracking**: NEO-M8N module for position tracking
 - **Real-time Telemetry**: Live distance, speed, signal, and location monitoring
 - **PWM Speed Control**: Variable motor speed (0-100%)
+- **LittleFS Storage**: Web files stored in ESP32 flash memory
 
 ## System Architecture
 
@@ -167,6 +170,19 @@ ESP32 DevKit V1 Pin Layout:
 └─────────────┘    └──────────────┘
 ```
 
+## Project Structure
+
+```
+ESP32_Network_Controlled_Car/
+├── ESP32_Network_Controlled_Car.ino  # Main Arduino sketch
+├── data/                             # Web interface files
+│   ├── index.html                    # Modern UI layout
+│   ├── style.css                     # Professional styling
+│   └── script.js                     # Interactive controls
+├── upload_fs.sh                      # Filesystem upload script
+└── README.md                         # Project documentation
+```
+
 ## Software Flow
 
 ```
@@ -178,27 +194,29 @@ ESP32 DevKit V1 Pin Layout:
 ┌─────────────┐
 │ Initialize  │
 │ - WiFi      │
+│ - LittleFS  │
 │ - Sensors   │
 │ - Motors    │
-│ - Radio     │
+│ - Radio/GPS │
 └──────┬──────┘
        │
        ▼
 ┌─────────────┐
 │ Start Web   │
 │ Server      │
+│ Serve Files │
 └──────┬──────┘
        │
        ▼
 ┌─────────────┐    ┌─────────────┐
 │ Main Loop   │───▶│Handle Web   │
-│             │    │Requests     │
+│             │    │API Requests │
 └──────┬──────┘    └─────────────┘
        │
        ▼
 ┌─────────────┐    ┌─────────────┐
 │Handle Radio │───▶│Process      │
-│Data         │    │Commands     │
+│& GPS Data   │    │Commands     │
 └──────┬──────┘    └─────────────┘
        │
        ▼
@@ -255,17 +273,30 @@ Movement Types:
 
 ## Web Interface Features
 
-### Control Panel
-- **Directional Buttons**: Forward, Reverse, Left, Right, Stop
+### Modern UI Design
+- **Dark Theme**: Professional dark interface with blue accents
+- **Responsive Layout**: Works on desktop, tablet, and mobile
+- **Grid-based Design**: Organized sections for different functions
+- **Smooth Animations**: Button hover effects and transitions
+
+### Control Methods
+- **Mouse/Touch**: Click buttons for movement control
+- **Keyboard Shortcuts**: 
+  - W/↑ = Forward
+  - S/↓ = Reverse  
+  - A/← = Left
+  - D/→ = Right
+  - Spacebar = Stop
 - **Speed Slider**: 0-100% motor speed control
 - **Real-time Response**: Instant command execution
 
 ### Radio Communication
 - **Message Input**: Send custom text messages
+- **Enter Key Support**: Press Enter to send messages
 - **Status Display**: Show last received message
 - **Range**: Up to 1km in open areas
 
-### Telemetry Dashboard
+### Live Telemetry Dashboard
 - **Distance**: Real-time obstacle detection (cm)
 - **WiFi Signal**: Connection strength (dBm)
 - **Radio Status**: Last received radio message
@@ -288,12 +319,28 @@ Movement Types:
    # Install required libraries:
    # - WiFi (built-in)
    # - WebServer (built-in)
+   # - LittleFS (built-in)
    # - HardwareSerial (built-in)
    ```
 
-3. **Configuration**:
-   - Update WiFi credentials in code
-   - Upload sketch to ESP32
+3. **Upload Process**:
+   ```bash
+   # 1. Upload Arduino sketch normally via Arduino IDE
+   
+   # 2. Upload web interface files to ESP32 filesystem
+   cd ESP32_Network_Controlled_Car/
+   ./upload_fs.sh
+   
+   # Or specify port manually
+   ./upload_fs.sh --port /dev/ttyUSB0
+   
+   # With cleanup after upload
+   ./upload_fs.sh --cleanup
+   ```
+
+4. **Configuration**:
+   - Update WiFi credentials in Arduino code
+   - Upload sketch and filesystem
    - Connect to car's IP address via web browser
 
 ## Usage
@@ -301,8 +348,13 @@ Movement Types:
 1. **Power On**: Connect battery/power supply
 2. **Connect**: Join car's WiFi network or connect to same network
 3. **Access**: Open web browser to ESP32's IP address
-4. **Control**: Use web interface buttons and sliders
+4. **Control Options**:
+   - **Mouse/Touch**: Click movement buttons
+   - **Keyboard**: Use WASD or arrow keys
+   - **Speed**: Adjust with slider
+   - **Radio**: Type messages and press Enter
 5. **Monitor**: View real-time telemetry data
+6. **Mobile**: Interface works on smartphones and tablets
 
 ## Troubleshooting
 
@@ -325,6 +377,12 @@ Movement Types:
 - Check trigger/echo connections
 - Verify 5V power supply from ESP32 to HC-SR04
 - Ensure L298N is providing stable 5V output
+
+**Web Interface Issues**:
+- Ensure filesystem uploaded with `./upload_fs.sh`
+- Check LittleFS mount in serial monitor
+- Verify all files in data/ directory
+- Try uploading filesystem again
 
 **Radio Communication Problems**:
 - Check APC220 wiring
@@ -349,8 +407,11 @@ Movement Types:
 | **Motor Voltage** | 6-12V DC |
 | **Logic Voltage** | 5V (from L298N) |
 | **Operating Current** | ~1A (total) |
-| **Control Interface** | Web Browser |
+| **Control Interface** | Modern Web Browser |
+| **UI Framework** | LittleFS + Responsive CSS |
+| **Input Methods** | Mouse/Touch/Keyboard |
 | **Update Rate** | 1Hz (telemetry) |
+| **Filesystem** | LittleFS (150KB partition) |
 
 ## Future Enhancements
 
