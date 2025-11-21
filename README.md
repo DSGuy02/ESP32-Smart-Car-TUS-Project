@@ -274,35 +274,42 @@ Movement Types:
 ## Web Interface Features
 
 ### Modern UI Design
-- **Dark Theme**: Professional dark interface with blue accents
-- **Responsive Layout**: Works on desktop, tablet, and mobile
-- **Grid-based Design**: Organized sections for different functions
-- **Smooth Animations**: Button hover effects and transitions
+- **Glassmorphism**: Translucent cards with backdrop blur effects
+- **Dynamic Gradients**: Animated background with floating elements
+- **Professional Typography**: Inter font with proper visual hierarchy
+- **Responsive Grid**: Adaptive layout for all screen sizes
+- **Smooth Animations**: 3D hover effects, transitions, and micro-interactions
 
-### Control Methods
-- **Mouse/Touch**: Click buttons for movement control
+### Enhanced Control Methods
+- **Interactive Buttons**: 3D styled buttons with glow effects and haptic feedback
 - **Keyboard Shortcuts**: 
   - W/↑ = Forward
   - S/↓ = Reverse  
   - A/← = Left
   - D/→ = Right
   - Spacebar = Stop
-- **Speed Slider**: 0-100% motor speed control
-- **Real-time Response**: Instant command execution
+- **Custom Speed Slider**: Animated slider with visual markers
+- **Visual Feedback**: Button highlighting and active state indicators
+- **Loading Screen**: Animated startup with connection status
+- **Help System**: Floating keyboard shortcuts modal
 
-### Radio Communication
-- **Message Input**: Send custom text messages
-- **Enter Key Support**: Press Enter to send messages
-- **Status Display**: Show last received message
+### Advanced Radio Communication
+- **Chat Interface**: Real-time message history with timestamps
+- **Smart Input**: Auto-resizing input field with Enter key support
+- **Message Types**: Visual distinction between sent/received messages
+- **Signal Strength**: Animated signal bars indicator
+- **Connection Status**: Live online/offline status with pulse animation
 - **Range**: Up to 1km in open areas
 
-### Live Telemetry Dashboard
-- **Distance**: Real-time obstacle detection (cm)
-- **WiFi Signal**: Connection strength (dBm)
-- **Radio Status**: Last received radio message
-- **GPS Location**: Live latitude/longitude coordinates
-- **Satellite Count**: Number of GPS satellites in view
-- **Auto-refresh**: Updates every 1 second
+### Interactive Telemetry Dashboard
+- **Animated Values**: Smooth value transitions with color feedback
+- **Distance Monitoring**: Real-time obstacle detection with visual alerts
+- **WiFi Signal Bars**: Animated strength indicators
+- **GPS Visualization**: Satellite count with visual indicators
+- **Connection Monitoring**: Network status with automatic reconnection
+- **Performance Optimized**: Debounced updates and smooth animations
+- **Mobile Optimized**: Touch interactions and haptic feedback
+- **Auto-refresh**: Real-time updates every 1 second
 
 ## Installation
 
@@ -349,12 +356,13 @@ Movement Types:
 2. **Connect**: Join car's WiFi network or connect to same network
 3. **Access**: Open web browser to ESP32's IP address
 4. **Control Options**:
-   - **Mouse/Touch**: Click movement buttons
-   - **Keyboard**: Use WASD or arrow keys
-   - **Speed**: Adjust with slider
-   - **Radio**: Type messages and press Enter
-5. **Monitor**: View real-time telemetry data
-6. **Mobile**: Interface works on smartphones and tablets
+   - **Interactive Buttons**: Click 3D styled movement controls
+   - **Keyboard**: Use WASD or arrow keys with visual feedback
+   - **Speed Control**: Drag animated slider with markers
+   - **Radio Chat**: Type messages in chat interface
+   - **Help**: Click keyboard icon for shortcuts guide
+5. **Monitor**: View animated real-time telemetry dashboard
+6. **Mobile**: Optimized touch interface with haptic feedback
 
 ## Troubleshooting
 
@@ -408,8 +416,10 @@ Movement Types:
 | **Logic Voltage** | 5V (from L298N) |
 | **Operating Current** | ~1A (total) |
 | **Control Interface** | Modern Web Browser |
-| **UI Framework** | LittleFS + Responsive CSS |
-| **Input Methods** | Mouse/Touch/Keyboard |
+| **UI Framework** | LittleFS + Modern CSS3/ES6 |
+| **Design System** | Glassmorphism with animations |
+| **Input Methods** | Mouse/Touch/Keyboard + Haptic |
+| **Performance** | Hardware-accelerated animations |
 | **Update Rate** | 1Hz (telemetry) |
 | **Filesystem** | LittleFS (150KB partition) |
 
