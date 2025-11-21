@@ -131,6 +131,7 @@ void looped() {
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <HardwareSerial.h>
 
 // Replace with your network credentials
 const char* ssid     = "D.S CE 3";
@@ -168,6 +169,12 @@ float distanceInch;
 
 String valueString = String(0);
 
+// APC220 Radio Module
+HardwareSerial radioSerial(2);
+String radioBuffer = "";
+String lastRadioMessage = "No data";
+unsigned long lastTelemetryTime = 0;
+
 float getDistance() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -177,6 +184,26 @@ float getDistance() {
   
   duration = pulseIn(echoPin, HIGH);
   return duration * SOUND_SPEED / 2;
+}
+
+void sendTelemetry() {
+  float distance = getDistance();
+  String telemetry = "DIST:" + String(distance, 1) + ",SPEED:" + valueString + ",WIFI:" + String(WiFi.RSSI());
+  radioSerial.println(telemetry);
+  Serial.println("Sent: " + telemetry);
+}
+
+void handleRadioData() {
+  while (radioSerial.available()) {
+    char c = radioSerial.read();
+    if (c == '\n') {
+      lastRadioMessage = radioBuffer;
+      Serial.println("Received: " + lastRadioMessage);
+      radioBuffer = "";
+    } else {
+      radioBuffer += c;
+    }
+  }
 }
 
 void handleRoot() {
@@ -201,6 +228,24 @@ void handleRoot() {
         document.getElementById('motorSpeed').innerHTML = pos;
         fetch(`/speed?value=${pos}`);
       }
+
+      function sendRadioMessage() {
+        const msg = document.getElementById('radioInput').value;
+        fetch(`/radio?msg=${encodeURIComponent(msg)}`);
+        document.getElementById('radioInput').value = '';
+      }
+
+      function updateTelemetry() {
+        fetch('/telemetry')
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById('distance').innerHTML = data.distance;
+            document.getElementById('wifiSignal').innerHTML = data.wifi;
+            document.getElementById('radioStatus').innerHTML = data.radio;
+          });
+      }
+
+      setInterval(updateTelemetry, 1000);
     </script>
   </head>
   <body>
@@ -216,6 +261,16 @@ void handleRoot() {
     <p><button class="button" onclick="moveReverse()">REVERSE</button></p>
     <p>Motor Speed: <span id="motorSpeed">0</span></p>
     <input type="range" min="0" max="100" step="25" id="motorSlider" oninput="updateMotorSpeed(this.value)" value="0"/>
+    
+    <hr>
+    <h2>Radio Communication</h2>
+    <input type="text" id="radioInput" placeholder="Enter message" style="padding: 8px; font-size: 16px;">
+    <button class="button" onclick="sendRadioMessage()">SEND</button>
+    
+    <h2>Telemetry</h2>
+    <p>Distance: <span id="distance">--</span> cm</p>
+    <p>WiFi Signal: <span id="wifiSignal">--</span> dBm</p>
+    <p>Radio Status: <span id="radioStatus">--</span></p>
   </body>
   </html>)rawliteral";
   server.send(200, "text/html", html);
@@ -305,10 +360,28 @@ void handleSpeed() {
   server.send(200);
 }
 
+void handleRadio() {
+  if (server.hasArg("msg")) {
+    String message = server.arg("msg");
+    radioSerial.println(message);
+    Serial.println("Radio sent: " + message);
+  }
+  server.send(200);
+}
+
+void handleTelemetry() {
+  float distance = getDistance();
+  String json = "{\"distance\":\"" + String(distance, 1) + 
+                "\",\"wifi\":\"" + String(WiFi.RSSI()) + 
+                "\",\"radio\":\"" + lastRadioMessage + "\"}";
+  server.send(200, "application/json", json);
+}
+
 
 
 void setup() {
   Serial.begin(115200);
+  radioSerial.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
@@ -348,6 +421,8 @@ void setup() {
   server.on("/right", handleRight);
   server.on("/reverse", handleReverse);
   server.on("/speed", handleSpeed);
+  server.on("/radio", handleRadio);
+  server.on("/telemetry", handleTelemetry);
 
   // Start the server
   server.begin();
@@ -355,8 +430,13 @@ void setup() {
 
 void loop() {
   server.handleClient();
-}
-  //delay(2000);
+  handleRadioData();
+  
+  // Send telemetry every 2 seconds
+  if (millis() - lastTelemetryTime > 2000) {
+    sendTelemetry();
+    lastTelemetryTime = millis();
+  }
 }
 
 
