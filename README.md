@@ -7,7 +7,8 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **WiFi Control**: Web-based interface for remote control
 - **Obstacle Detection**: Ultrasonic sensor prevents collisions
 - **Radio Communication**: APC220 module for long-range messaging
-- **Real-time Telemetry**: Live distance, speed, and signal monitoring
+- **GPS Tracking**: NEO-M8N module for position tracking
+- **Real-time Telemetry**: Live distance, speed, signal, and location monitoring
 - **PWM Speed Control**: Variable motor speed (0-100%)
 
 ## System Architecture
@@ -63,6 +64,15 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **Interface**: UART (TTL)
 - **Power**: 3.3V-5V
 
+### NEO-M8N GPS Module
+- **Channels**: 72 acquisition, 22 tracking
+- **Accuracy**: 2.5m CEP (50%)
+- **Cold Start**: 26s
+- **Hot Start**: 1s
+- **Update Rate**: 1-10Hz
+- **Interface**: UART (TTL)
+- **Power**: 3.3V-5V
+
 ### DC Gear Motors (2x)
 - **Voltage**: 3V-6V
 - **RPM**: 200 (at 6V)
@@ -88,6 +98,8 @@ ESP32 DevKit V1 Pin Layout:
               GPIO18──┤10         21├── GPIO5  (Trig)
               GPIO19──┤11         20├── GPIO17 (APC TX)
               GPIO21──┤12         19├── GPIO16 (APC RX)
+               GND ──┤13         18├── GPIO4  (GPS RX)
+              GPIO22──┤14         17├── GPIO2  (GPS TX)
                GND ──┤13         18├── GPIO4
               GPIO22──┤14         17├── GPIO0
               GPIO23──┤15         16├── GPIO2
@@ -127,6 +139,15 @@ ESP32 DevKit V1 Pin Layout:
 │ GPIO17 ─────┼────┤RXD           │
 │ GPIO16 ─────┼────┤TXD           │
 │ 5V ─────────┼────┤VCC           │
+│ GND ────────┼────┤GND           │
+└─────────────┘    └──────────────┘
+
+┌─────────────┐    ┌──────────────┐
+│   ESP32     │    │   NEO-M8N    │
+│             │    │              │
+│ GPIO2 ──────┼────┤RXD           │
+│ GPIO4 ──────┼────┤TXD           │
+│ 3.3V ───────┼────┤VCC           │
 │ GND ────────┼────┤GND           │
 └─────────────┘    └──────────────┘
 ```
@@ -233,6 +254,8 @@ Movement Types:
 - **Distance**: Real-time obstacle detection (cm)
 - **WiFi Signal**: Connection strength (dBm)
 - **Radio Status**: Last received radio message
+- **GPS Location**: Live latitude/longitude coordinates
+- **Satellite Count**: Number of GPS satellites in view
 - **Auto-refresh**: Updates every 1 second
 
 ## Installation
@@ -289,6 +312,12 @@ Movement Types:
 - Verify baud rate (9600)
 - Test with serial monitor
 
+**GPS Issues**:
+- Ensure clear sky view for satellite reception
+- Check NEO-M8N wiring (RX/TX)
+- Wait for GPS fix (may take 30+ seconds outdoors)
+- Verify 3.3V power supply
+
 ## Technical Specifications
 
 | Component | Specification |
@@ -296,6 +325,7 @@ Movement Types:
 | **Microcontroller** | ESP32 DevKit V1 |
 | **WiFi Range** | 50-100m (indoor) |
 | **Radio Range** | Up to 1000m (APC220) |
+| **GPS Accuracy** | 2.5m CEP (NEO-M8N) |
 | **Detection Range** | 2-400cm (HC-SR04) |
 | **Motor Voltage** | 3-6V DC |
 | **Operating Current** | ~500mA (total) |
@@ -305,10 +335,11 @@ Movement Types:
 ## Future Enhancements
 
 - **Camera Integration**: Live video streaming
-- **GPS Module**: Position tracking and navigation
+- **Navigation System**: Waypoint-based autonomous driving
 - **Battery Monitor**: Voltage and charge level display
 - **Mobile App**: Dedicated smartphone application
 - **Autonomous Mode**: AI-powered obstacle avoidance
+- **Geofencing**: Virtual boundary alerts
 
 ## License
 

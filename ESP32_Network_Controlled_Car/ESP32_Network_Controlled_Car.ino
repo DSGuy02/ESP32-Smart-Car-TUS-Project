@@ -132,6 +132,7 @@ void looped() {
 #include <WiFi.h>
 #include <WebServer.h>
 #include <HardwareSerial.h>
+#include <SoftwareSerial.h>
 
 // Replace with your network credentials
 const char* ssid     = "D.S CE 3";
@@ -175,6 +176,14 @@ String radioBuffer = "";
 String lastRadioMessage = "No data";
 unsigned long lastTelemetryTime = 0;
 
+// NEO-M8N GPS Module
+HardwareSerial gpsSerial(1);
+String gpsBuffer = "";
+float latitude = 0.0;
+float longitude = 0.0;
+int satellites = 0;
+String gpsStatus = "No Fix";
+
 float getDistance() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -186,9 +195,41 @@ float getDistance() {
   return duration * SOUND_SPEED / 2;
 }
 
+void parseGPS() {
+  while (gpsSerial.available()) {
+    char c = gpsSerial.read();
+    if (c == '\n') {
+      if (gpsBuffer.startsWith("$GPGGA")) {
+        int commaIndex[14];
+        int commaCount = 0;
+        for (int i = 0; i < gpsBuffer.length() && commaCount < 14; i++) {
+          if (gpsBuffer.charAt(i) == ',') {
+            commaIndex[commaCount++] = i;
+          }
+        }
+        if (commaCount >= 6) {
+          String latStr = gpsBuffer.substring(commaIndex[1] + 1, commaIndex[2]);
+          String lonStr = gpsBuffer.substring(commaIndex[3] + 1, commaIndex[4]);
+          String satStr = gpsBuffer.substring(commaIndex[6] + 1, commaIndex[7]);
+          
+          if (latStr.length() > 0 && lonStr.length() > 0) {
+            latitude = latStr.toFloat() / 100.0;
+            longitude = lonStr.toFloat() / 100.0;
+            satellites = satStr.toInt();
+            gpsStatus = satellites > 0 ? "Fix" : "No Fix";
+          }
+        }
+      }
+      gpsBuffer = "";
+    } else {
+      gpsBuffer += c;
+    }
+  }
+}
+
 void sendTelemetry() {
   float distance = getDistance();
-  String telemetry = "DIST:" + String(distance, 1) + ",SPEED:" + valueString + ",WIFI:" + String(WiFi.RSSI());
+  String telemetry = "DIST:" + String(distance, 1) + ",SPEED:" + valueString + ",WIFI:" + String(WiFi.RSSI()) + ",LAT:" + String(latitude, 6) + ",LON:" + String(longitude, 6);
   radioSerial.println(telemetry);
   Serial.println("Sent: " + telemetry);
 }
@@ -242,6 +283,10 @@ void handleRoot() {
             document.getElementById('distance').innerHTML = data.distance;
             document.getElementById('wifiSignal').innerHTML = data.wifi;
             document.getElementById('radioStatus').innerHTML = data.radio;
+            document.getElementById('gpsLat').innerHTML = data.latitude;
+            document.getElementById('gpsLon').innerHTML = data.longitude;
+            document.getElementById('gpsSats').innerHTML = data.satellites;
+            document.getElementById('gpsStatus').innerHTML = data.gpsStatus;
           });
       }
 
@@ -271,6 +316,12 @@ void handleRoot() {
     <p>Distance: <span id="distance">--</span> cm</p>
     <p>WiFi Signal: <span id="wifiSignal">--</span> dBm</p>
     <p>Radio Status: <span id="radioStatus">--</span></p>
+    
+    <h2>GPS Location</h2>
+    <p>Latitude: <span id="gpsLat">--</span></p>
+    <p>Longitude: <span id="gpsLon">--</span></p>
+    <p>Satellites: <span id="gpsSats">--</span></p>
+    <p>Status: <span id="gpsStatus">--</span></p>
   </body>
   </html>)rawliteral";
   server.send(200, "text/html", html);
@@ -373,7 +424,11 @@ void handleTelemetry() {
   float distance = getDistance();
   String json = "{\"distance\":\"" + String(distance, 1) + 
                 "\",\"wifi\":\"" + String(WiFi.RSSI()) + 
-                "\",\"radio\":\"" + lastRadioMessage + "\"}";
+                "\",\"radio\":\"" + lastRadioMessage + 
+                "\",\"latitude\":\"" + String(latitude, 6) + 
+                "\",\"longitude\":\"" + String(longitude, 6) + 
+                "\",\"satellites\":\"" + String(satellites) + 
+                "\",\"gpsStatus\":\"" + gpsStatus + "\"}";
   server.send(200, "application/json", json);
 }
 
@@ -382,6 +437,7 @@ void handleTelemetry() {
 void setup() {
   Serial.begin(115200);
   radioSerial.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
+  gpsSerial.begin(9600, SERIAL_8N1, 4, 2); // RX=4, TX=2
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
@@ -431,6 +487,7 @@ void setup() {
 void loop() {
   server.handleClient();
   handleRadioData();
+  parseGPS();
   
   // Send telemetry every 2 seconds
   if (millis() - lastTelemetryTime > 2000) {
