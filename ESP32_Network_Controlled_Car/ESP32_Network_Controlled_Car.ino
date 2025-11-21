@@ -154,7 +154,30 @@ const int freq = 30000;
 const int resolution = 8;
 int dutyCycle = 0;
 
+// Variables for Ultrasponic
+const int trigPin = 5;
+const int echoPin = 18;
+
+//define sound speed in cm/uS
+#define SOUND_SPEED 0.034
+#define CM_TO_INCH 0.393701
+
+long duration;
+float distanceCm;
+float distanceInch;
+
 String valueString = String(0);
+
+float getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  duration = pulseIn(echoPin, HIGH);
+  return duration * SOUND_SPEED / 2;
+}
 
 void handleRoot() {
   const char html[] PROGMEM = R"rawliteral(
@@ -199,20 +222,32 @@ void handleRoot() {
 }
 
 void handleForward() {
-  Serial.println("Forward");
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, HIGH); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
+  float distance = getDistance();
+  if (distance > 10) {
+    Serial.println("Forward");
+    digitalWrite(motor1Pin1, LOW);
+    digitalWrite(motor1Pin2, HIGH); 
+    digitalWrite(motor2Pin1, LOW);
+    digitalWrite(motor2Pin2, HIGH);
+  } else {
+    Serial.println("Obstacle detected - Forward blocked");
+    handleStop();
+  }
   server.send(200);
 }
 
 void handleLeft() {
-  Serial.println("Left");
-  digitalWrite(motor1Pin1, LOW); 
-  digitalWrite(motor1Pin2, LOW); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
+  float distance = getDistance();
+  if (distance > 10) {
+    Serial.println("Left");
+    digitalWrite(motor1Pin1, LOW); 
+    digitalWrite(motor1Pin2, LOW); 
+    digitalWrite(motor2Pin1, LOW);
+    digitalWrite(motor2Pin2, HIGH);
+  } else {
+    Serial.println("Obstacle detected - Left blocked");
+    handleStop();
+  }
   server.send(200);
 }
 
@@ -226,11 +261,17 @@ void handleStop() {
 }
 
 void handleRight() {
-  Serial.println("Right");
-  digitalWrite(motor1Pin1, LOW); 
-  digitalWrite(motor1Pin2, HIGH); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);    
+  float distance = getDistance();
+  if (distance > 10) {
+    Serial.println("Right");
+    digitalWrite(motor1Pin1, LOW); 
+    digitalWrite(motor1Pin2, HIGH); 
+    digitalWrite(motor2Pin1, LOW);
+    digitalWrite(motor2Pin2, LOW);
+  } else {
+    Serial.println("Obstacle detected - Right blocked");
+    handleStop();
+  }
   server.send(200);
 }
 
@@ -264,8 +305,13 @@ void handleSpeed() {
   server.send(200);
 }
 
+
+
 void setup() {
   Serial.begin(115200);
+
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
   // Set the Motor pins as outputs
   pinMode(motor1Pin1, OUTPUT);
@@ -309,13 +355,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  //handleForward();
-  //delay(2000);
-  //handleReverse();
-  //delay(2000);
-  //handleLeft();
-  //delay(2000);
-  //handleRight();
+}
   //delay(2000);
 }
 
