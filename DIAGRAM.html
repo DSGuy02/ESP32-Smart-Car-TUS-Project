@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>hardware_diagram.txt</title>
+</head>
+<!-- Highlighting: "None" -->
+<body>
+<pre style='color:#cfcfc2;background-color:#232629;'>
+ESP32 NETWORK CONTROLLED CAR - COMPLETE HARDWARE DIAGRAM
+================================================================
+
+                                    POWER DISTRIBUTION
+                                    ==================
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                EXTERNAL POWER SUPPLY                   │
+                    │                    (7-12V DC)                          │
+                    │                                                         │
+                    │    ┌─────────┐                                         │
+                    │    │ Battery │                                         │
+                    │    │ 7-12V   │                                         │
+                    │    │   (+)   │──────────────────┐                      │
+                    │    │   (-)   │──────────────────┼──────────────────┐   │
+                    │    └─────────┘                  │                  │   │
+                    └─────────────────────────────────┼──────────────────┼───┘
+                                                      │                  │
+                                                      ▼                  ▼
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    L298N MOTOR DRIVER                  │
+                    │                                                         │
+                    │  VCC ◄──── 7-12V (External Power)                      │
+                    │  +5V ────► 5V Regulated Output ──────┐                 │
+                    │  GND ◄──── Ground Common ────────────┼─────────────┐   │
+                    │                                       │             │   │
+                    │  ┌─────────────────────────────────┐  │             │   │
+                    │  │        MOTOR OUTPUTS            │  │             │   │
+                    │  │  OUT1 ──► Motor1 (+)            │  │             │   │
+                    │  │  OUT2 ──► Motor1 (-)            │  │             │   │
+                    │  │  OUT3 ──► Motor2 (+)            │  │             │   │
+                    │  │  OUT4 ──► Motor2 (-)            │  │             │   │
+                    │  └─────────────────────────────────┘  │             │   │
+                    └───────────────────────────────────────┼─────────────┼───┘
+                                                            │             │
+                                                            ▼             ▼
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    ESP32 DEVKIT V1                     │
+                    │                   (MAIN CONTROLLER)                    │
+                    │                                                         │
+                    │  VIN ◄──── 5V (from L298N)                             │
+                    │  GND ◄──── Ground Common                               │
+                    │  3.3V ───► 3.3V Output (for GPS)                      │
+                    │                                                         │
+                    └─────────────────────────────────────────────────────────┘
+
+                                    COMPLETE SYSTEM LAYOUT
+                                    ======================
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                           ESP32 NETWORK CONTROLLED CAR                                           │
+│                                              HARDWARE DIAGRAM                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+                    HC-SR04 ULTRASONIC SENSOR                                    APC220 RADIO MODULE
+                    ┌─────────────────────────┐                                ┌─────────────────────────┐
+                    │         FRONT           │                                │      LONG RANGE         │
+                    │    OBSTACLE DETECTION   │                                │    COMMUNICATION        │
+                    │                         │                                │                         │
+                    │  VCC ◄──── 5V          │                                │  VCC ◄──── 5V          │
+                    │  GND ◄──── GND         │                                │  GND ◄──── GND         │
+                    │  Trig ◄─── GPIO5       │                                │  RXD ◄─── GPIO17       │
+                    │  Echo ───► GPIO18      │                                │  TXD ───► GPIO16       │
+                    │                         │                                │                         │
+                    │  Range: 2cm - 400cm    │                                │  Range: Up to 1000m    │
+                    │  Frequency: 40kHz      │                                │  Frequency: 418-455MHz │
+                    └─────────────────────────┘                                └─────────────────────────┘
+                                │                                                            │
+                                │                                                            │
+                                ▼                                                            ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                                     │
+│                                            ESP32 DEVKIT V1                                                        │
+│                                         MICROCONTROLLER UNIT                                                      │
+│                                                                                                                     │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│    │                                        PIN LAYOUT                                                        │   │
+│    │                                                                                                           │   │
+│    │         3V3 ──┤1                                                                    30├── GND            │   │
+│    │         GND ──┤2                                                                    29├── GPIO23         │   │
+│    │      GPIO15 ──┤3                                                                    28├── GPIO22 (LED2)  │   │
+│    │       GPIO2 ──┤4                          ESP32                                     27├── GPIO1/TX       │   │
+│    │       GPIO0 ──┤5                        DEVKIT V1                                   26├── GPIO3/RX       │   │
+│    │       GPIO4 ──┤6  ◄─── GPS RX                                                       25├── GPIO21 (LED1)  │   │
+│    │      GPIO16 ──┤7  ◄─── APC RX                                                       24├── GND            │   │
+│    │      GPIO17 ──┤8  ───► APC TX                                                       23├── GPIO19 (Buzzer)│   │
+│    │       GPIO5 ──┤9  ───► Ultrasonic Trig                                             22├── GPIO18 (Echo)  │   │
+│    │      GPIO18 ──┤10 ◄─── Ultrasonic Echo                                             21├── GPIO5 (Trig)   │   │
+│    │      GPIO19 ──┤11 ───► Buzzer                                                       20├── GPIO17 (APC TX)│   │
+│    │      GPIO21 ──┤12 ───► LED1                                                         19├── GPIO16 (APC RX)│   │
+│    │         GND ──┤13                                                                   18├── GPIO4 (GPS RX) │   │
+│    │      GPIO22 ──┤14 ───► LED2                                                         17├── GPIO2 (GPS TX) │   │
+│    │      GPIO23 ──┤15                                                                   16├── GPIO2          │   │
+│    │                                                                                                           │   │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                                                     │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│    │                                    MOTOR CONTROL PINS                                                    │   │
+│    │                                                                                                           │   │
+│    │      GPIO27 ───► L298N IN1 (Motor1 Direction)                                                            │   │
+│    │      GPIO26 ───► L298N IN2 (Motor1 Direction)                                                            │   │
+│    │      GPIO14 ───► L298N ENA (Motor1 Speed PWM)                                                            │   │
+│    │                                                                                                           │   │
+│    │      GPIO33 ───► L298N IN3 (Motor2 Direction)                                                            │   │
+│    │      GPIO25 ───► L298N IN4 (Motor2 Direction)                                                            │   │
+│    │      GPIO32 ───► L298N ENB (Motor2 Speed PWM)                                                            │   │
+│    │                                                                                                           │   │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                │                                                            │
+                                ▼                                                            ▼
+                    ┌─────────────────────────┐                                ┌─────────────────────────┐
+                    │      NEO-M8N GPS        │                                │      VISUAL/AUDIO       │
+                    │     POSITION TRACKING   │                                │       INDICATORS        │
+                    │                         │                                │                         │
+                    │  VCC ◄──── 3.3V        │                                │  ┌─────────────────────┐ │
+                    │  GND ◄──── GND         │                                │  │      LED1 (RED)     │ │
+                    │  RXD ◄─── GPIO2        │                                │  │  GPIO21 ───► Anode  │ │
+                    │  TXD ───► GPIO4        │                                │  │  GND ────── Cathode │ │
+                    │                         │                                │  └─────────────────────┘ │
+                    │  Channels: 72 acq/22 tr│                                │  ┌─────────────────────┐ │
+                    │  Accuracy: 2.5m CEP    │                                │  │     LED2 (BLUE)    │ │
+                    │  Cold Start: 26s       │                                │  │  GPIO22 ───► Anode  │ │
+                    │  Hot Start: 1s         │                                │  │  GND ────── Cathode │ │
+                    └─────────────────────────┘                                │  └─────────────────────┘ │
+                                                                               │  ┌─────────────────────┐ │
+                                                                               │  │   PASSIVE BUZZER    │ │
+                                                                               │  │  GPIO19 ───► Signal │ │
+                                                                               │  │  GND ────── Ground  │ │
+                                                                               │  │  Freq: 100Hz-10kHz │ │
+                                                                               │  │  Volume: 85dB@10cm │ │
+                                                                               │  └─────────────────────┘ │
+                                                                               └─────────────────────────┘
+
+                                    L298N MOTOR DRIVER &amp; MOTORS
+                                    ===========================
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                          L298N DUAL H-BRIDGE                                                    │
+│                                           MOTOR DRIVER                                                          │
+│                                                                                                                 │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│    │                                    POWER SECTION                                                     │   │
+│    │                                                                                                       │   │
+│    │  VCC ◄──── 7-12V (External Battery)                                                                  │   │
+│    │  +5V ────► 5V Regulated (to ESP32 VIN)                                                               │   │
+│    │  GND ◄──── Ground Common                                                                              │   │
+│    │                                                                                                       │   │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                                                 │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│    │                                   CONTROL INPUTS                                                     │   │
+│    │                                                                                                       │   │
+│    │  IN1 ◄──── GPIO27 (Motor1 Direction A)                                                               │   │
+│    │  IN2 ◄──── GPIO26 (Motor1 Direction B)                                                               │   │
+│    │  ENA ◄──── GPIO14 (Motor1 Speed PWM)                                                                 │   │
+│    │                                                                                                       │   │
+│    │  IN3 ◄──── GPIO33 (Motor2 Direction A)                                                               │   │
+│    │  IN4 ◄──── GPIO25 (Motor2 Direction B)                                                               │   │
+│    │  ENB ◄──── GPIO32 (Motor2 Speed PWM)                                                                 │   │
+│    │                                                                                                       │   │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                                                 │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│    │                                   MOTOR OUTPUTS                                                      │   │
+│    │                                                                                                       │   │
+│    │  OUT1 ────► Motor1 (+) Terminal                                                                      │   │
+│    │  OUT2 ────► Motor1 (-) Terminal                                                                      │   │
+│    │                                                                                                       │   │
+│    │  OUT3 ────► Motor2 (+) Terminal                                                                      │   │
+│    │  OUT4 ────► Motor2 (-) Terminal                                                                      │   │
+│    │                                                                                                       │   │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                │                                                            │
+                                ▼                                                            ▼
+                    ┌─────────────────────────┐                                ┌─────────────────────────┐
+                    │      DC GEAR MOTOR      │                                │      DC GEAR MOTOR      │
+                    │         (LEFT)          │                                │        (RIGHT)          │
+                    │                         │                                │                         │
+                    │  (+) ◄──── OUT1        │                                │  (+) ◄──── OUT3        │
+                    │  (-) ◄──── OUT2        │                                │  (-) ◄──── OUT4        │
+                    │                         │                                │                         │
+                    │  Voltage: 3-6V         │                                │  Voltage: 3-6V         │
+                    │  RPM: 200 @ 6V         │                                │  RPM: 200 @ 6V         │
+                    │  Current: ~150mA       │                                │  Current: ~150mA       │
+                    │  Torque: High Geared   │                                │  Torque: High Geared   │
+                    └─────────────────────────┘                                └─────────────────────────┘
+
+                                    MOVEMENT CONTROL LOGIC
+                                    ======================
+
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                FORWARD MOVEMENT                         │
+                    │                                                         │
+                    │  Motor1: OUT1(+) OUT2(-)  →  Clockwise                │
+                    │  Motor2: OUT3(+) OUT4(-)  →  Clockwise                │
+                    │                                                         │
+                    │  GPIO27=LOW, GPIO26=HIGH  (Motor1 Forward)             │
+                    │  GPIO33=LOW, GPIO25=HIGH  (Motor2 Forward)             │
+                    └─────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                REVERSE MOVEMENT                         │
+                    │                                                         │
+                    │  Motor1: OUT1(-) OUT2(+)  →  Counter-Clockwise        │
+                    │  Motor2: OUT3(-) OUT4(+)  →  Counter-Clockwise        │
+                    │                                                         │
+                    │  GPIO27=HIGH, GPIO26=LOW  (Motor1 Reverse)             │
+                    │  GPIO33=HIGH, GPIO25=LOW  (Motor2 Reverse)             │
+                    └─────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                 LEFT TURN                               │
+                    │                                                         │
+                    │  Motor1: STOP                                          │
+                    │  Motor2: OUT3(+) OUT4(-)  →  Clockwise                │
+                    │                                                         │
+                    │  GPIO27=LOW, GPIO26=LOW   (Motor1 Stop)               │
+                    │  GPIO33=LOW, GPIO25=HIGH  (Motor2 Forward)             │
+                    └─────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                RIGHT TURN                               │
+                    │                                                         │
+                    │  Motor1: OUT1(+) OUT2(-)  →  Clockwise                │
+                    │  Motor2: STOP                                          │
+                    │                                                         │
+                    │  GPIO27=LOW, GPIO26=HIGH  (Motor1 Forward)             │
+                    │  GPIO33=LOW, GPIO25=LOW   (Motor2 Stop)                │
+                    └─────────────────────────────────────────────────────────┘
+
+                                    COMMUNICATION MODULES
+                                    =====================
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                        WIRELESS COMMUNICATION                                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────┐                                ┌─────────────────────────┐
+                    │       WiFi MODULE       │                                │     APC220 RADIO       │
+                    │      (BUILT-IN ESP32)   │                                │    LONG RANGE MODULE    │
+                    │                         │                                │                         │
+                    │  Standard: 802.11 b/g/n│                                │  Frequency: 418-455MHz │
+                    │  Range: 50-100m indoor │                                │  Range: Up to 1000m    │
+                    │  Security: WPA2/WPA3   │                                │  Baud Rate: 9600       │
+                    │  Interface: Built-in   │                                │  Interface: UART       │
+                    │                         │                                │  Power: 5V             │
+                    │  ┌─────────────────────┐│                                │                         │
+                    │  │   WEB SERVER        ││                                │  RXD ◄─── GPIO17      │
+                    │  │   Port: 80          ││                                │  TXD ───► GPIO16      │
+                    │  │   Protocol: HTTP    ││                                │  VCC ◄─── 5V          │
+                    │  │   Files: LittleFS   ││                                │  GND ◄─── GND         │
+                    │  └─────────────────────┘│                                │                         │
+                    └─────────────────────────┘                                └─────────────────────────┘
+
+                                    SENSOR ARRAY
+                                    ============
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                           SENSOR MODULES                                                        │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────────┐                                ┌─────────────────────────┐
+                    │    HC-SR04 ULTRASONIC  │                                │      NEO-M8N GPS       │
+                    │   OBSTACLE DETECTION    │                                │    POSITION TRACKING   │
+                    │                         │                                │                         │
+                    │  ┌─────────────────────┐│                                │  ┌─────────────────────┐│
+                    │  │    TRANSMITTER      ││                                │  │   SATELLITE ARRAY  ││
+                    │  │      40kHz          ││                                │  │   72 Acquisition    ││
+                    │  │   )))  )))  )))    ││                                │  │   22 Tracking       ││
+                    │  └─────────────────────┘│                                │  └─────────────────────┘│
+                    │  ┌─────────────────────┐│                                │                         │
+                    │  │     RECEIVER        ││                                │  Accuracy: 2.5m CEP    │
+                    │  │      40kHz          ││                                │  Cold Start: 26s       │
+                    │  │   (((  (((  (((    ││                                │  Hot Start: 1s         │
+                    │  └─────────────────────┘│                                │  Update Rate: 1-10Hz   │
+                    │                         │                                │                         │
+                    │  Range: 2cm - 400cm    │                                │  RXD ◄─── GPIO2        │
+                    │  Accuracy: ±3mm        │                                │  TXD ───► GPIO4        │
+                    │  Trigger: 10µs pulse   │                                │  VCC ◄─── 3.3V         │
+                    │                         │                                │  GND ◄─── GND          │
+                    │  Trig ◄─── GPIO5       │                                │                         │
+                    │  Echo ───► GPIO18      │                                │  Protocol: NMEA 0183   │
+                    │  VCC ◄─── 5V           │                                │  Messages: GPGGA, etc. │
+                    │  GND ◄─── GND          │                                │                         │
+                    └─────────────────────────┘                                └─────────────────────────┘
+
+                                    SYSTEM SPECIFICATIONS
+                                    =====================
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                        TECHNICAL SPECIFICATIONS                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+    MICROCONTROLLER:                           POWER REQUIREMENTS:                    COMMUNICATION:
+    ┌─────────────────────────┐               ┌─────────────────────────┐            ┌─────────────────────────┐
+    │ ESP32 DevKit V1         │               │ External: 7-12V DC      │            │ WiFi: 802.11 b/g/n     │
+    │ CPU: Dual-core 240MHz   │               │ Logic: 5V (L298N reg.)  │            │ Range: 50-100m         │
+    │ RAM: 520KB SRAM         │               │ ESP32: 5V input         │            │ Radio: 418-455MHz      │
+    │ Flash: 4MB              │               │ GPS: 3.3V               │            │ Range: Up to 1000m     │
+    │ WiFi: Built-in          │               │ Total Current: ~1A      │            │ Protocol: HTTP/UART    │
+    │ GPIO: 30 pins           │               │ Motors: 6-12V           │            │ Web Server: Port 80     │
+    │ PWM: 16 channels        │               │ Sensors: 5V/3.3V        │            │ Filesystem: LittleFS   │
+    └─────────────────────────┘               └─────────────────────────┘            └─────────────────────────┘
+
+    MOTOR SPECIFICATIONS:                      SENSOR SPECIFICATIONS:                 INDICATOR SPECIFICATIONS:
+    ┌─────────────────────────┐               ┌─────────────────────────┐            ┌─────────────────────────┐
+    │ Type: DC Gear Motors    │               │ Ultrasonic: HC-SR04     │            │ LED1: Red 5mm           │
+    │ Quantity: 2             │               │ Range: 2-400cm          │            │ LED2: Blue 5mm          │
+    │ Voltage: 3-6V           │               │ GPS: NEO-M8N            │            │ Current: ~20mA each     │
+    │ RPM: 200 @ 6V           │               │ Accuracy: 2.5m          │            │ Buzzer: Passive         │
+    │ Current: ~150mA each    │               │ Radio: APC220           │            │ Frequency: 100Hz-10kHz │
+    │ Driver: L298N H-Bridge  │               │ Range: 1000m            │            │ Volume: 85dB @ 10cm    │
+    │ Control: PWM Speed      │               │ WiFi Signal: Built-in   │            │ Control: GPIO Toggle   │
+    └─────────────────────────┘               └─────────────────────────┘            └─────────────────────────┘
+
+                                    CONTROL INTERFACE
+                                    =================
+
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                         WEB INTERFACE                                                           │
+│                                    (Glassmorphism Design)                                                      │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+    MOVEMENT CONTROLS:                         INDICATOR CONTROLS:                    TELEMETRY DISPLAY:
+    ┌─────────────────────────┐               ┌─────────────────────────┐            ┌─────────────────────────┐
+    │      [FORWARD]          │               │  [🔴] [🔊] [🔵]        │            │ Distance: XX.X cm       │
+    │                         │               │ LED1  BUZZ LED2         │            │ WiFi: -XX dBm          │
+    │ [LEFT][STOP][RIGHT]     │               │                         │            │ GPS: XX.XXXXXX         │
+    │                         │               │ Press &amp; Hold Buzzer     │            │ Satellites: XX          │
+    │     [REVERSE]           │               │ Toggle LEDs On/Off      │            │ Radio: Last Message    │
+    │                         │               │                         │            │ Speed: XX%             │
+    │ Speed: [====|----] XX%  │               │ Visual State Feedback   │            │ Status: Online/Offline │
+    └─────────────────────────┘               └─────────────────────────┘            └─────────────────────────┘
+
+    KEYBOARD SHORTCUTS:                        RADIO COMMUNICATION:                   FEATURES:
+    ┌─────────────────────────┐               ┌─────────────────────────┐            ┌─────────────────────────┐
+    │ W / ↑  = Forward        │               │ ┌─────────────────────┐ │            │ • Real-time Telemetry   │
+    │ S / ↓  = Reverse        │               │ │ Message History     │ │            │ • Obstacle Detection    │
+    │ A / ←  = Left           │               │ │ [12:34] System OK   │ │            │ • GPS Position Tracking │
+    │ D / →  = Right          │               │ │ [12:35] User: Hi    │ │            │ • Radio Communication   │
+    │ Space  = Stop           │               │ │ [12:36] Car: Hello  │ │            │ • Visual Indicators     │
+    │ Enter  = Send Message   │               │ └─────────────────────┘ │            │ • Audio Feedback        │
+    │ Help   = Show Shortcuts │               │ [Type message...] [SEND]│            │ • Mobile Responsive     │
+    └─────────────────────────┘               └─────────────────────────┘            └─────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+                                        END OF HARDWARE DIAGRAM
+                                    ESP32 Network Controlled Car v1.0
+                                      Complete System Documentation
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════</pre>
+</body>
+</html>
