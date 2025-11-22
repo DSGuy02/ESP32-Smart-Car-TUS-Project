@@ -1,133 +1,8 @@
-
 /*
-#include "BluetoothSerial.h"
-
-
-BluetoothSerial SerialBT;
-
-
-int Motor1Pin1 = 26;
-int Motor1Pin2 = 27;
-
-int Motor2Pin1 = 25;
-int Motor2Pin2 = 33;
-
-String SBT;
-
-bool hasLooped = false;
-
-void setup() {
-   Serial.begin(115200);
-   SerialBT.begin("ESP32_Car");
-   
-    
-   pinMode(Motor1Pin1, OUTPUT);
-   pinMode(Motor1Pin2, OUTPUT);
-   pinMode(Motor2Pin1, OUTPUT);
-   pinMode(Motor2Pin2, OUTPUT);
-}
-
-
-void loop() {
-
-   if (!hasLooped) {
-      Serial.println("Starting");
-      digitalWrite(Motor1Pin1, HIGH);
-      digitalWrite(Motor1Pin2, LOW);
-      digitalWrite(Motor2Pin1, HIGH);
-      digitalWrite(Motor2Pin2, LOW);
-      
-      delay(2000);
-
-      digitalWrite(Motor1Pin1, LOW);
-      digitalWrite(Motor1Pin2, HIGH);
-      digitalWrite(Motor2Pin1, LOW);
-      digitalWrite(Motor2Pin2, HIGH);
-
-      delay(2000);
-      
-      Serial.println("Finished");
-   }
-
-   
-   hasLooped = true;
-   digitalWrite(Motor1Pin1, LOW);
-   digitalWrite(Motor1Pin2, LOW);
-   digitalWrite(Motor2Pin1, LOW);
-   digitalWrite(Motor2Pin2, LOW);
-
-}
-
-void looped() {
-   if (Serial.available()) {
-      SerialBT.write(Serial.read());
-   }
-
-   if (SerialBT.available()) {
-      Serial.write(SerialBT.read());
-   }
-
-   delay(5);
-   SBT = SerialBT.readString();
-   Serial.println(SBT);
-
-   if (SBT == "f") {
-      //digitalWrite(C1, HIGH);
-      //digitalWrite(A1, LOW);
-      //digitalWrite(C2, HIGH);
-      //digitalWrite(A2, LOW);
-   }
-
-   else if (SBT == "b") {
-      //digitalWrite(C1, LOW);
-      //digitalWrite(A1, HIGH);
-      //digitalWrite(C2, LOW);
-      //digitalWrite(A2, HIGH);
-   }
-
-   else if (SBT == "l") {
-      //digitalWrite(C1, LOW);
-      //digitalWrite(A1, HIGH);
-      //digitalWrite(C2, HIGH);
-      //digitalWrite(A2, LOW);
-      delay(200);
-    
-      //digitalWrite(C1, LOW);
-      //digitalWrite(A1, LOW);
-      //digitalWrite(C2, LOW);
-      //digitalWrite(A2, LOW);
-   }
-
-   else if (SBT == "r") {
-      //digitalWrite(C1, HIGH);
-      //digitalWrite(A1, LOW);
-      //digitalWrite(C2, LOW);
-      //digitalWrite(A2, HIGH);
-      
-      delay(200);
-      
-      //digitalWrite(C1, LOW);
-      //digitalWrite(A1, LOW);
-      //digitalWrite(C2, LOW);
-      //digitalWrite(A2, LOW); 
-   } else {
-      //digitalWrite(C1, LOW);
-      //digitalWrite(A1, LOW);
-      //digitalWrite(C2, LOW);
-      //digitalWrite(A2, LOW); 
-   }
-}
-
+  ESP32 Network Controlled Car
+  Advanced WiFi-controlled robot car with obstacle detection, GPS tracking, 
+  radio communication, and modern web interface.
 */
-
-
-/*  
-  Rui Santos & Sara Santos - Random Nerd Tutorials
-  https://RandomNerdTutorials.com/esp32-wi-fi-car-robot-arduino/
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files.
-  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 
 #include <WiFi.h>
 #include <WebServer.h>
@@ -136,8 +11,8 @@ void looped() {
 #define SPIFFS LittleFS
 
 // Replace with your network credentials
-const char* ssid     = "D.S CE 3";
-const char* password = "01ad3j!5";
+const char* ssid     = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 // Create an instance of the WebServer on port 80
 WebServer server(80);
@@ -256,8 +131,6 @@ void handleRadioData() {
     }
   }
 }
-
-
 
 void handleForward() {
   float distance = getDistance();
@@ -392,8 +265,6 @@ void handleTelemetry() {
   server.send(200, "application/json", json);
 }
 
-
-
 void setup() {
   Serial.begin(115200);
   radioSerial.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
@@ -453,7 +324,6 @@ void setup() {
   server.on("/buzzer", handleBuzzer);
   server.on("/led1", handleLED1);
   server.on("/led2", handleLED2);
-  server.on("/telemetry", handleTelemetry);er", handleBuzzer);
   server.on("/telemetry", handleTelemetry);
 
   // Start the server
@@ -471,5 +341,3 @@ void loop() {
     lastTelemetryTime = millis();
   }
 }
-
-

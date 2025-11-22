@@ -476,6 +476,13 @@ Movement Types:
 - **Autonomous Mode**: AI-powered obstacle avoidance
 - **Geofencing**: Virtual boundary alerts
 
+## Acknowledgments
+
+This project was inspired by the ESP32 WiFi Car tutorial from Random Nerd Tutorials:
+https://RandomNerdTutorials.com/esp32-wi-fi-car-robot-arduino/
+
+The project has been significantly expanded with additional features including GPS tracking, radio communication, modern web interface, and comprehensive sensor integration.
+
 ## License
 
-This project is based on Random Nerd Tutorials ESP32 car example with additional features for radio communication and enhanced obstacle detection.
+This project is open source and available under the MIT License.
