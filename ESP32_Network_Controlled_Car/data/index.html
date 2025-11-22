@@ -85,6 +85,26 @@
                 </div>
               </div>
             </div>
+            
+            <div class="indicator-controls">
+              <button class="indicator-btn led-btn" id="led1Btn" onclick="toggleLED1()">
+                <span class="btn-icon">🔴</span>
+                <span class="btn-text">LED 1</span>
+                <div class="btn-glow"></div>
+              </button>
+              
+              <button class="buzzer-btn" id="buzzerBtn" onmousedown="startBuzzer()" onmouseup="stopBuzzer()" ontouchstart="startBuzzer()" ontouchend="stopBuzzer()">
+                <span class="btn-icon">🔊</span>
+                <span class="btn-text">BUZZER</span>
+                <div class="btn-glow"></div>
+              </button>
+              
+              <button class="indicator-btn led-btn" id="led2Btn" onclick="toggleLED2()">
+                <span class="btn-icon">🔵</span>
+                <span class="btn-text">LED 2</span>
+                <div class="btn-glow"></div>
+              </button>
+            </div>
           </div>
         </div>
       </section>

@@ -12,6 +12,8 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **GPS Tracking**: NEO-M8N module for position tracking
 - **Real-time Telemetry**: Live distance, speed, signal, and location monitoring
 - **PWM Speed Control**: Variable motor speed (0-100%)
+- **Buzzer Control**: Independent buzzer button with press-and-hold operation
+- **LED Indicators**: Two controllable LEDs with toggle buttons
 - **LittleFS Storage**: Web files stored in ESP32 flash memory
 
 ## System Architecture
@@ -82,6 +84,20 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **Torque**: High torque geared
 - **Current**: ~150mA (no load)
 
+### Passive Buzzer
+- **Operating Voltage**: 3.3V-5V
+- **Frequency Range**: 100Hz-10kHz
+- **Sound Level**: 85dB (at 10cm)
+- **Interface**: Digital PWM
+- **Current**: ~30mA
+
+### LED Indicators (2x)
+- **Operating Voltage**: 3.3V-5V
+- **Forward Current**: ~20mA
+- **Colors**: Red (LED1), Blue (LED2)
+- **Interface**: Digital GPIO
+- **Brightness**: Standard 5mm LEDs
+
 ## Pin Configuration
 
 ```
@@ -103,6 +119,9 @@ ESP32 DevKit V1 Pin Layout:
               GPIO21──┤12         19├── GPIO16 (APC RX)
                GND ──┤13         18├── GPIO4  (GPS RX)
               GPIO22──┤14         17├── GPIO2  (GPS TX)
+              GPIO23──┤15         16├── GPIO19 (Buzzer)
+               GND ──┤13         18├── GPIO21 (LED1)
+              GPIO22──┤14         17├── GPIO22 (LED2)
                GND ──┤13         18├── GPIO4
               GPIO22──┤14         17├── GPIO0
               GPIO23──┤15         16├── GPIO2
@@ -167,6 +186,27 @@ ESP32 DevKit V1 Pin Layout:
 │ GPIO4 ──────┼────┤TXD           │
 │ 3.3V ───────┼────┤VCC           │
 │ GND ────────┼────┤GND           │
+└─────────────┘    └──────────────┘
+
+┌─────────────┐    ┌──────────────┐
+│   ESP32     │    │   Buzzer     │
+│             │    │              │
+│ GPIO19 ─────┼────┤Signal        │
+│ GND ────────┼────┤GND           │
+└─────────────┘    └──────────────┘
+
+┌─────────────┐    ┌──────────────┐
+│   ESP32     │    │ LED1 (Red)   │
+│             │    │              │
+│ GPIO21 ─────┼────┤Anode         │
+│ GND ────────┼────┤Cathode       │
+└─────────────┘    └──────────────┘
+
+┌─────────────┐    ┌──────────────┐
+│   ESP32     │    │ LED2 (Blue)  │
+│             │    │              │
+│ GPIO22 ─────┼────┤Anode         │
+│ GND ────────┼────┤Cathode       │
 └─────────────┘    └──────────────┘
 ```
 
@@ -282,6 +322,8 @@ Movement Types:
 
 ### Enhanced Control Methods
 - **Interactive Buttons**: 3D styled buttons with glow effects and haptic feedback
+- **Buzzer Button**: Dedicated press-and-hold buzzer control with visual feedback
+- **LED Controls**: Toggle buttons for two independent LED indicators
 - **Keyboard Shortcuts**: 
   - W/↑ = Forward
   - S/↓ = Reverse  
@@ -359,6 +401,8 @@ Movement Types:
    - **Interactive Buttons**: Click 3D styled movement controls
    - **Keyboard**: Use WASD or arrow keys with visual feedback
    - **Speed Control**: Drag animated slider with markers
+   - **Buzzer**: Press and hold buzzer button for audio feedback
+   - **LEDs**: Click LED buttons to toggle red and blue indicators
    - **Radio Chat**: Type messages in chat interface
    - **Help**: Click keyboard icon for shortcuts guide
 5. **Monitor**: View animated real-time telemetry dashboard

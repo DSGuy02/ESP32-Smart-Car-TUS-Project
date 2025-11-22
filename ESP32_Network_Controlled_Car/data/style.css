@@ -403,6 +403,118 @@ body::before {
   color: var(--text-secondary);
 }
 
+.indicator-controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.buzzer-btn {
+  position: relative;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+.buzzer-btn:hover {
+  border-color: var(--accent-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.buzzer-btn:active {
+  background: var(--accent-orange);
+  box-shadow: 0 0 20px rgba(255, 167, 38, 0.4);
+  transform: translateY(-1px);
+}
+
+.buzzer-btn .btn-icon {
+  font-size: 1.2rem;
+}
+
+.buzzer-btn .btn-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.buzzer-btn:hover .btn-text {
+  color: var(--text-primary);
+}
+
+.buzzer-btn:active .btn-text {
+  color: white;
+}
+
+.indicator-btn {
+  position: relative;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+.indicator-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.indicator-btn:active {
+  transform: translateY(-1px);
+}
+
+.indicator-btn.active {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.led-btn:hover {
+  border-color: var(--accent-blue);
+}
+
+.led-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.led-btn .btn-icon {
+  font-size: 1.2rem;
+}
+
+.led-btn .btn-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.led-btn:hover .btn-text {
+  color: var(--text-primary);
+}
+
+.led-btn.active .btn-text {
+  color: white;
+}
+
 .signal-strength {
   display: flex;
   gap: 3px;

@@ -24,6 +24,70 @@ function moveReverse() {
   executeCommand('/reverse', 'reverse');
 }
 
+function startBuzzer() {
+  fetch('/buzzer?state=on')
+    .then(response => {
+      if (response.ok) {
+        updateConnectionStatus(true);
+        document.getElementById('buzzerBtn').classList.add('active');
+      }
+    })
+    .catch(error => {
+      console.error('Buzzer start failed:', error);
+      updateConnectionStatus(false);
+    });
+}
+
+function stopBuzzer() {
+  fetch('/buzzer?state=off')
+    .then(response => {
+      if (response.ok) {
+        updateConnectionStatus(true);
+        document.getElementById('buzzerBtn').classList.remove('active');
+      }
+    })
+    .catch(error => {
+      console.error('Buzzer stop failed:', error);
+      updateConnectionStatus(false);
+    });
+}
+
+function toggleLED1() {
+  fetch('/led1')
+    .then(response => {
+      if (response.ok) {
+        updateConnectionStatus(true);
+        const btn = document.getElementById('led1Btn');
+        btn.classList.toggle('active');
+        // Update icon based on state
+        const icon = btn.querySelector('.btn-icon');
+        icon.textContent = btn.classList.contains('active') ? '🔴' : '⚫';
+      }
+    })
+    .catch(error => {
+      console.error('LED1 toggle failed:', error);
+      updateConnectionStatus(false);
+    });
+}
+
+function toggleLED2() {
+  fetch('/led2')
+    .then(response => {
+      if (response.ok) {
+        updateConnectionStatus(true);
+        const btn = document.getElementById('led2Btn');
+        btn.classList.toggle('active');
+        // Update icon based on state
+        const icon = btn.querySelector('.btn-icon');
+        icon.textContent = btn.classList.contains('active') ? '🔵' : '⚫';
+      }
+    })
+    .catch(error => {
+      console.error('LED2 toggle failed:', error);
+      updateConnectionStatus(false);
+    });
+}
+
 function executeCommand(endpoint, direction) {
   fetch(endpoint)
     .then(response => {

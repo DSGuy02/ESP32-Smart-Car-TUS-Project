@@ -161,6 +161,15 @@ int dutyCycle = 0;
 const int trigPin = 5;
 const int echoPin = 18;
 
+// Buzzer
+const int buzzerPin = 19;
+
+// LEDs
+const int led1Pin = 21;
+const int led2Pin = 22;
+bool led1State = false;
+bool led2State = false;
+
 //define sound speed in cm/uS
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -285,7 +294,7 @@ void handleStop() {
   digitalWrite(motor1Pin1, LOW); 
   digitalWrite(motor1Pin2, LOW); 
   digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);   
+  digitalWrite(motor2Pin2, LOW);
   server.send(200);
 }
 
@@ -309,7 +318,7 @@ void handleReverse() {
   digitalWrite(motor1Pin1, HIGH);
   digitalWrite(motor1Pin2, LOW); 
   digitalWrite(motor2Pin1, HIGH);
-  digitalWrite(motor2Pin2, LOW);          
+  digitalWrite(motor2Pin2, LOW);
   server.send(200);
 }
 
@@ -343,6 +352,34 @@ void handleRadio() {
   server.send(200);
 }
 
+void handleBuzzer() {
+  if (server.hasArg("state")) {
+    String state = server.arg("state");
+    if (state == "on") {
+      tone(buzzerPin, 1000);
+      Serial.println("Buzzer ON");
+    } else {
+      noTone(buzzerPin);
+      Serial.println("Buzzer OFF");
+    }
+  }
+  server.send(200);
+}
+
+void handleLED1() {
+  led1State = !led1State;
+  digitalWrite(led1Pin, led1State ? HIGH : LOW);
+  Serial.println(led1State ? "LED1 ON" : "LED1 OFF");
+  server.send(200);
+}
+
+void handleLED2() {
+  led2State = !led2State;
+  digitalWrite(led2Pin, led2State ? HIGH : LOW);
+  Serial.println(led2State ? "LED2 ON" : "LED2 OFF");
+  server.send(200);
+}
+
 void handleTelemetry() {
   float distance = getDistance();
   String json = "{\"distance\":\"" + String(distance, 1) + 
@@ -369,6 +406,9 @@ void setup() {
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(buzzerPin, OUTPUT); // Sets the buzzerPin as an Output
+  pinMode(led1Pin, OUTPUT); // Sets LED1 as an Output
+  pinMode(led2Pin, OUTPUT); // Sets LED2 as an Output
 
   // Set the Motor pins as outputs
   pinMode(motor1Pin1, OUTPUT);
@@ -410,6 +450,10 @@ void setup() {
   server.on("/reverse", handleReverse);
   server.on("/speed", handleSpeed);
   server.on("/radio", handleRadio);
+  server.on("/buzzer", handleBuzzer);
+  server.on("/led1", handleLED1);
+  server.on("/led2", handleLED2);
+  server.on("/telemetry", handleTelemetry);er", handleBuzzer);
   server.on("/telemetry", handleTelemetry);
 
   // Start the server
