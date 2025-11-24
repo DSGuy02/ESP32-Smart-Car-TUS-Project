@@ -15,7 +15,7 @@
   <header class="header">
     <div class="header-content">
       <div class="logo">
-        <span class="car-icon">🚗</span>
+        <span class="car-icon">CAR</span>
         <h1>ESP32 Motor Car</h1>
       </div>
       <div class="connection-status" id="connectionStatus">
@@ -30,7 +30,7 @@
       <section class="control-section">
         <div class="card glass-card">
           <div class="card-header">
-            <h2><span class="icon">🎮</span> Movement Controls</h2>
+            <h2><span class="icon">[CTRL]</span> Movement Controls</h2>
             <div class="control-mode-toggle">
               <button class="mode-btn active" data-mode="manual">Manual</button>
               <button class="mode-btn" data-mode="auto">Auto</button>
@@ -40,33 +40,33 @@
           <div class="movement-container">
             <div class="movement-grid">
               <button class="control-btn forward-btn" data-direction="forward">
-                <span class="btn-icon">⬆️</span>
+                <span class="btn-icon">↑</span>
                 <span class="btn-text">FORWARD</span>
                 <div class="btn-glow"></div>
               </button>
               
               <div class="side-controls">
                 <button class="control-btn left-btn" data-direction="left">
-                  <span class="btn-icon">⬅️</span>
+                  <span class="btn-icon">←</span>
                   <span class="btn-text">LEFT</span>
                   <div class="btn-glow"></div>
                 </button>
                 
                 <button class="control-btn stop-btn" data-direction="stop">
-                  <span class="btn-icon">⏹️</span>
+                  <span class="btn-icon">■</span>
                   <span class="btn-text">STOP</span>
                   <div class="btn-glow"></div>
                 </button>
                 
                 <button class="control-btn right-btn" data-direction="right">
-                  <span class="btn-icon">➡️</span>
+                  <span class="btn-icon">→</span>
                   <span class="btn-text">RIGHT</span>
                   <div class="btn-glow"></div>
                 </button>
               </div>
               
               <button class="control-btn reverse-btn" data-direction="reverse">
-                <span class="btn-icon">⬇️</span>
+                <span class="btn-icon">↓</span>
                 <span class="btn-text">REVERSE</span>
                 <div class="btn-glow"></div>
               </button>
@@ -88,19 +88,19 @@
             
             <div class="indicator-controls">
               <button class="indicator-btn led-btn" id="led1Btn" onclick="toggleLED1()">
-                <span class="btn-icon">🔴</span>
+                <span class="btn-icon">●</span>
                 <span class="btn-text">LED 1</span>
                 <div class="btn-glow"></div>
               </button>
               
               <button class="buzzer-btn" id="buzzerBtn" onmousedown="startBuzzer()" onmouseup="stopBuzzer()" ontouchstart="startBuzzer()" ontouchend="stopBuzzer()">
-                <span class="btn-icon">🔊</span>
+                <span class="btn-icon">♪</span>
                 <span class="btn-text">BUZZER</span>
                 <div class="btn-glow"></div>
               </button>
               
               <button class="indicator-btn led-btn" id="led2Btn" onclick="toggleLED2()">
-                <span class="btn-icon">🔵</span>
+                <span class="btn-icon">●</span>
                 <span class="btn-text">LED 2</span>
                 <div class="btn-glow"></div>
               </button>
@@ -112,7 +112,7 @@
       <section class="communication-section">
         <div class="card glass-card">
           <div class="card-header">
-            <h2><span class="icon">📡</span> Radio Communication</h2>
+            <h2><span class="icon">[RADIO]</span> Radio Communication</h2>
             <div class="signal-strength" id="signalStrength">
               <div class="signal-bar"></div>
               <div class="signal-bar"></div>
@@ -133,7 +133,7 @@
               <div class="input-group">
                 <input type="text" id="radioInput" placeholder="Type your message..." class="radio-input">
                 <button class="send-btn" id="sendBtn">
-                  <span class="send-icon">📤</span>
+                  <span class="send-icon">→</span>
                 </button>
               </div>
             </div>
@@ -144,13 +144,13 @@
       <section class="telemetry-section">
         <div class="card glass-card">
           <div class="card-header">
-            <h2><span class="icon">📊</span> Live Telemetry</h2>
+            <h2><span class="icon">[DATA]</span> Live Telemetry</h2>
             <div class="refresh-indicator" id="refreshIndicator"></div>
           </div>
           
           <div class="telemetry-grid">
             <div class="telemetry-item">
-              <div class="telemetry-icon">📏</div>
+              <div class="telemetry-icon">[DIST]</div>
               <div class="telemetry-content">
                 <span class="telemetry-label">Distance</span>
                 <span class="telemetry-value" id="distance">--</span>
@@ -160,7 +160,7 @@
             </div>
             
             <div class="telemetry-item">
-              <div class="telemetry-icon">📶</div>
+              <div class="telemetry-icon">[WIFI]</div>
               <div class="telemetry-content">
                 <span class="telemetry-label">WiFi Signal</span>
                 <span class="telemetry-value" id="wifiSignal">--</span>
@@ -180,7 +180,7 @@
       <section class="gps-section">
         <div class="card glass-card">
           <div class="card-header">
-            <h2><span class="icon">🛰️</span> GPS Location</h2>
+            <h2><span class="icon">[GPS]</span> GPS Location</h2>
             <div class="gps-status" id="gpsStatusIndicator">
               <span class="status-dot"></span>
               <span class="status-text" id="gpsStatus">No Fix</span>
@@ -190,7 +190,7 @@
           <div class="gps-container">
             <div class="coordinates-display">
               <div class="coordinate-item">
-                <div class="coord-icon">🌐</div>
+                <div class="coord-icon">[LAT]</div>
                 <div class="coord-content">
                   <span class="coord-label">Latitude</span>
                   <span class="coord-value" id="gpsLat">--</span>
@@ -198,7 +198,7 @@
               </div>
               
               <div class="coordinate-item">
-                <div class="coord-icon">🌍</div>
+                <div class="coord-icon">[LON]</div>
                 <div class="coord-content">
                   <span class="coord-label">Longitude</span>
                   <span class="coord-value" id="gpsLon">--</span>
@@ -208,7 +208,7 @@
             
             <div class="satellite-info">
               <div class="satellite-count">
-                <span class="sat-icon">🛰️</span>
+                <span class="sat-icon">[SAT]</span>
                 <span class="sat-count" id="gpsSats">0</span>
                 <span class="sat-label">Satellites</span>
               </div>
@@ -239,7 +239,7 @@
   </div>
   
   <button class="help-toggle" onclick="toggleKeyboardHelp()" title="Keyboard shortcuts">
-    <span>⌨️</span>
+    <span>[?]</span>
   </button>
   
   <script src="script.js"></script>

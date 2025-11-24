@@ -61,7 +61,8 @@ function toggleLED1() {
         btn.classList.toggle('active');
         // Update icon based on state
         const icon = btn.querySelector('.btn-icon');
-        icon.textContent = btn.classList.contains('active') ? '🔴' : '⚫';
+        icon.textContent = btn.classList.contains('active') ? '●' : '○';
+        icon.style.color = btn.classList.contains('active') ? '#ff4757' : '';
       }
     })
     .catch(error => {
@@ -79,7 +80,8 @@ function toggleLED2() {
         btn.classList.toggle('active');
         // Update icon based on state
         const icon = btn.querySelector('.btn-icon');
-        icon.textContent = btn.classList.contains('active') ? '🔵' : '⚫';
+        icon.textContent = btn.classList.contains('active') ? '●' : '○';
+        icon.style.color = btn.classList.contains('active') ? '#00d4ff' : '';
       }
     })
     .catch(error => {

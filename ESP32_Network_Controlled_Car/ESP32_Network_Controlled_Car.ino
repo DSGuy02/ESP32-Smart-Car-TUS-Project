@@ -11,8 +11,8 @@
 #define SPIFFS LittleFS
 
 // Replace with your network credentials
-const char* ssid     = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid     = "D.S CE 3";
+const char* password = "01ad3j!5";
 
 // Create an instance of the WebServer on port 80
 WebServer server(80);
