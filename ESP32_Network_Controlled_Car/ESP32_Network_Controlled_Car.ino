@@ -1,7 +1,7 @@
 /*
   ESP32 Network Controlled Car
-  Advanced WiFi-controlled robot car with obstacle detection, GPS tracking, 
-  radio communication, and modern web interface.
+  Advanced WiFi-controlled robot car with dual obstacle detection (ultrasonic + IR), 
+  GPS tracking, and modern web interface.
 */
 
 #include <WiFi.h>
@@ -55,11 +55,9 @@ float distanceInch;
 
 String valueString = String(0);
 
-// APC220 Radio Module
-HardwareSerial radioSerial(2);
-String radioBuffer = "";
-String lastRadioMessage = "No data";
-unsigned long lastTelemetryTime = 0;
+// IR Obstacle Sensor
+const int irSensorPin = 17;
+bool irDetected = false;
 
 // NEO-M8N GPS Module
 HardwareSerial gpsSerial(1);
@@ -112,29 +110,18 @@ void parseGPS() {
   }
 }
 
-void sendTelemetry() {
+bool checkObstacles() {
   float distance = getDistance();
-  String telemetry = "DIST:" + String(distance, 1) + ",SPEED:" + valueString + ",WIFI:" + String(WiFi.RSSI()) + ",LAT:" + String(latitude, 6) + ",LON:" + String(longitude, 6);
-  radioSerial.println(telemetry);
-  Serial.println("Sent: " + telemetry);
+  irDetected = digitalRead(irSensorPin) == HIGH;
+  
+  // Return true if path is clear (distance > 10cm AND IR sensor clear)
+  return (distance > 10.0 && !irDetected);
 }
 
-void handleRadioData() {
-  while (radioSerial.available()) {
-    char c = radioSerial.read();
-    if (c == '\n') {
-      lastRadioMessage = radioBuffer;
-      Serial.println("Received: " + lastRadioMessage);
-      radioBuffer = "";
-    } else {
-      radioBuffer += c;
-    }
-  }
-}
+
 
 void handleForward() {
-  float distance = getDistance();
-  if (distance > 10) {
+  if (checkObstacles()) {
     Serial.println("Forward");
     digitalWrite(motor1Pin1, LOW);
     digitalWrite(motor1Pin2, HIGH); 
@@ -148,8 +135,7 @@ void handleForward() {
 }
 
 void handleLeft() {
-  float distance = getDistance();
-  if (distance > 10) {
+  if (checkObstacles()) {
     Serial.println("Left");
     digitalWrite(motor1Pin1, LOW); 
     digitalWrite(motor1Pin2, LOW); 
@@ -172,8 +158,7 @@ void handleStop() {
 }
 
 void handleRight() {
-  float distance = getDistance();
-  if (distance > 10) {
+  if (checkObstacles()) {
     Serial.println("Right");
     digitalWrite(motor1Pin1, LOW); 
     digitalWrite(motor1Pin2, HIGH); 
@@ -216,14 +201,7 @@ void handleSpeed() {
   server.send(200);
 }
 
-void handleRadio() {
-  if (server.hasArg("msg")) {
-    String message = server.arg("msg");
-    radioSerial.println(message);
-    Serial.println("Radio sent: " + message);
-  }
-  server.send(200);
-}
+
 
 void handleBuzzer() {
   if (server.hasArg("state")) {
@@ -255,10 +233,15 @@ void handleLED2() {
 
 void handleTelemetry() {
   float distance = getDistance();
+  irDetected = digitalRead(irSensorPin) == HIGH;
+  bool obstacleDetected = !checkObstacles();
+  
   String json = "{\"distance\":\"" + String(distance, 1) + 
                 "\",\"wifi\":\"" + String(WiFi.RSSI()) + 
-                "\",\"radio\":\"" + lastRadioMessage + 
-                "\",\"latitude\":\"" + String(latitude, 6) + 
+                "\",\"irDetected\":" + (irDetected ? "true" : "false") + 
+                ",\"obstacleDetected\":" + (obstacleDetected ? "true" : "false") + 
+                ",\"motorStatus\":\"Ready\"" +
+                ",\"latitude\":\"" + String(latitude, 6) + 
                 "\",\"longitude\":\"" + String(longitude, 6) + 
                 "\",\"satellites\":\"" + String(satellites) + 
                 "\",\"gpsStatus\":\"" + gpsStatus + "\"}";
@@ -267,7 +250,6 @@ void handleTelemetry() {
 
 void setup() {
   Serial.begin(115200);
-  radioSerial.begin(9600, SERIAL_8N1, 16, 17); // RX=16, TX=17
   gpsSerial.begin(9600, SERIAL_8N1, 4, 2); // RX=4, TX=2
 
   if (!SPIFFS.begin(true)) {
@@ -277,6 +259,7 @@ void setup() {
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(irSensorPin, INPUT); // Sets the IR sensor as an Input
   pinMode(buzzerPin, OUTPUT); // Sets the buzzerPin as an Output
   pinMode(led1Pin, OUTPUT); // Sets LED1 as an Output
   pinMode(led2Pin, OUTPUT); // Sets LED2 as an Output
@@ -320,7 +303,7 @@ void setup() {
   server.on("/right", handleRight);
   server.on("/reverse", handleReverse);
   server.on("/speed", handleSpeed);
-  server.on("/radio", handleRadio);
+
   server.on("/buzzer", handleBuzzer);
   server.on("/led1", handleLED1);
   server.on("/led2", handleLED2);
@@ -332,12 +315,5 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  handleRadioData();
   parseGPS();
-  
-  // Send telemetry every 2 seconds
-  if (millis() - lastTelemetryTime > 2000) {
-    sendTelemetry();
-    lastTelemetryTime = millis();
-  }
 }
