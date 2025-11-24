@@ -8,7 +8,7 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **WiFi Control**: Responsive web-based interface for remote control
 - **Keyboard Controls**: WASD/Arrow keys + Spacebar for quick control
 - **Obstacle Detection**: Ultrasonic sensor prevents collisions
-- **Radio Communication**: APC220 module for long-range messaging
+- **IR Obstacle Detection**: Additional IR sensor for enhanced obstacle avoidance
 - **GPS Tracking**: NEO-M8N module for position tracking
 - **Real-time Telemetry**: Live distance, speed, signal, and location monitoring
 - **PWM Speed Control**: Variable motor speed (0-100%)
@@ -62,12 +62,12 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **Operating Voltage**: 5V
 - **Trigger Pulse**: 10µs
 
-### APC220 Radio Module
-- **Frequency**: 418MHz-455MHz
-- **Range**: Up to 1000m (open area)
-- **Baud Rate**: 1200-19200 bps
-- **Interface**: UART (TTL)
-- **Power**: 3.3V-5V
+### IR Obstacle Sensor
+- **Detection Range**: 2cm - 30cm
+- **Response Time**: <1ms
+- **Operating Voltage**: 3.3V-5V
+- **Interface**: Digital GPIO
+- **Detection Angle**: 35°
 
 ### NEO-M8N GPS Module
 - **Channels**: 72 acquisition, 22 tracking
@@ -107,25 +107,28 @@ ESP32 DevKit V1 Pin Layout:
                      │   DevKit    │
                3V3 ──┤1          30├── GND
                GND ──┤2          29├── GPIO23
-              GPIO15──┤3          28├── GPIO22
+              GPIO15──┤3          28├── GPIO22 (LED2)
               GPIO2 ──┤4          27├── GPIO1/TX
               GPIO0 ──┤5          26├── GPIO3/RX
-              GPIO4 ──┤6          25├── GPIO21
+              GPIO4 ──┤6          25├── GPIO21 (LED1)
               GPIO16──┤7          24├── GND
-              GPIO17──┤8          23├── GPIO19
+              GPIO17──┤8          23├── GPIO19 (Buzzer)
               GPIO5 ──┤9          22├── GPIO18 (Echo)
               GPIO18──┤10         21├── GPIO5  (Trig)
-              GPIO19──┤11         20├── GPIO17 (APC TX)
-              GPIO21──┤12         19├── GPIO16 (APC RX)
+              GPIO19──┤11         20├── GPIO17 (IR Sensor)
+              GPIO21──┤12         19├── GPIO16
                GND ──┤13         18├── GPIO4  (GPS RX)
               GPIO22──┤14         17├── GPIO2  (GPS TX)
-              GPIO23──┤15         16├── GPIO19 (Buzzer)
-               GND ──┤13         18├── GPIO21 (LED1)
-              GPIO22──┤14         17├── GPIO22 (LED2)
-               GND ──┤13         18├── GPIO4
-              GPIO22──┤14         17├── GPIO0
-              GPIO23──┤15         16├── GPIO2
+              GPIO23──┤15         16├── GPIO15
                      └─────────────┘
+
+Motor Control Pins (not shown in layout above):
+- GPIO27: L298N IN1 (Motor1 Direction)
+- GPIO26: L298N IN2 (Motor1 Direction) 
+- GPIO14: L298N ENA (Motor1 Speed PWM)
+- GPIO33: L298N IN3 (Motor2 Direction)
+- GPIO25: L298N IN4 (Motor2 Direction)
+- GPIO32: L298N ENB (Motor2 Speed PWM)
 ```
 
 ## Power Distribution
@@ -171,10 +174,9 @@ ESP32 DevKit V1 Pin Layout:
 └─────────────┘    └──────────────┘
 
 ┌─────────────┐    ┌──────────────┐
-│   ESP32     │    │   APC220     │
-│             │    │              │
-│ GPIO17 ─────┼────┤RXD           │
-│ GPIO16 ─────┼────┤TXD           │
+│   ESP32     │    │ IR Obstacle  │
+│             │    │   Sensor     │
+│ GPIO17 ─────┼────┤OUT           │
 │ 5V ─────────┼────┤VCC           │
 │ GND ────────┼────┤GND           │
 └─────────────┘    └──────────────┘
@@ -335,13 +337,11 @@ Movement Types:
 - **Loading Screen**: Animated startup with connection status
 - **Help System**: Floating keyboard shortcuts modal
 
-### Advanced Radio Communication
-- **Chat Interface**: Real-time message history with timestamps
-- **Smart Input**: Auto-resizing input field with Enter key support
-- **Message Types**: Visual distinction between sent/received messages
-- **Signal Strength**: Animated signal bars indicator
+### System Status Logging
+- **Status Messages**: Real-time system status and alerts
+- **Event History**: Timestamped log of system events
 - **Connection Status**: Live online/offline status with pulse animation
-- **Range**: Up to 1km in open areas
+- **Error Reporting**: Automatic error detection and logging
 
 ### Interactive Telemetry Dashboard
 - **Animated Values**: Smooth value transitions with color feedback

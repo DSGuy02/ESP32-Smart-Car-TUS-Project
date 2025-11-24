@@ -144,24 +144,8 @@ function updateMotorSpeed(pos) {
     });
 }
 
-function sendRadioMessage() {
-  const input = document.getElementById('radioInput');
-  const msg = input.value.trim();
-  
-  if (msg) {
-    fetch(`/radio?msg=${encodeURIComponent(msg)}`)
-      .then(response => {
-        if (response.ok) {
-          addMessageToHistory(msg, 'sent');
-          input.value = '';
-          updateConnectionStatus(true);
-        }
-      })
-      .catch(error => {
-        console.error('Radio message failed:', error);
-        updateConnectionStatus(false);
-      });
-  }
+function addSystemLog(message, type = 'received') {
+  addMessageToHistory(message, type);
 }
 
 function addMessageToHistory(message, type) {
@@ -200,13 +184,11 @@ function updateTelemetry() {
       updateValueWithAnimation('gpsLon', data.longitude);
       updateValueWithAnimation('gpsSats', data.satellites);
       
-      // Update radio status
-      const radioStatus = document.getElementById('radioStatus');
-      if (radioStatus && data.radio !== radioStatus.textContent) {
-        if (data.radio !== 'No data' && data.radio !== '--') {
-          addMessageToHistory(data.radio, 'received');
-        }
-      }
+      // Update IR sensor status
+      updateIRStatus(data.irDetected);
+      
+      // Update system status
+      updateSystemStatus(data.obstacleDetected, data.motorStatus);
       
       // Update GPS status
       updateGPSStatus(data.gpsStatus, parseInt(data.satellites));
@@ -330,22 +312,32 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// Enhanced radio input handling
-document.addEventListener('DOMContentLoaded', function() {
-  const radioInput = document.getElementById('radioInput');
+function updateIRStatus(detected) {
+  const irStatus = document.getElementById('irStatus');
+  const irIndicator = document.querySelector('.indicator-dot');
   
-  radioInput.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-      sendRadioMessage();
-    }
-  });
+  if (detected) {
+    irStatus.textContent = 'Detected';
+    irIndicator.className = 'indicator-dot detected';
+  } else {
+    irStatus.textContent = 'Clear';
+    irIndicator.className = 'indicator-dot clear';
+  }
+}
+
+function updateSystemStatus(obstacleDetected, motorStatus) {
+  const obstacleStatusEl = document.getElementById('obstacleStatus');
+  const motorStatusEl = document.getElementById('motorStatus');
   
-  // Auto-resize input based on content
-  radioInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-});
+  if (obstacleStatusEl) {
+    obstacleStatusEl.textContent = obstacleDetected ? 'Obstacle Detected' : 'Path Clear';
+    obstacleStatusEl.style.color = obstacleDetected ? 'var(--accent-red)' : 'var(--accent-green)';
+  }
+  
+  if (motorStatusEl) {
+    motorStatusEl.textContent = motorStatus || 'Ready';
+  }
+}
 
 // Add click handlers for control buttons
 document.addEventListener('DOMContentLoaded', function() {
@@ -363,8 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Send button handler
-  document.getElementById('sendBtn').addEventListener('click', sendRadioMessage);
+  // System status updates are handled in telemetry
   
   // Mode toggle handlers
   document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -404,9 +395,11 @@ document.addEventListener('DOMContentLoaded', function() {
   updateTelemetry();
   setInterval(updateTelemetry, 1000);
   
-  // Initialize message history with welcome message
+  // Initialize system log with welcome message
   setTimeout(() => {
-    addMessageToHistory('ESP32 Motor Car initialized', 'received');
+    addSystemLog('ESP32 Motor Car initialized');
+    addSystemLog('Obstacle detection active');
+    addSystemLog('System ready for operation');
   }, 2000);
   
   // Add smooth scrolling to all internal links
@@ -435,12 +428,12 @@ document.addEventListener('visibilitychange', function() {
 // Add error handling for network issues
 window.addEventListener('online', function() {
   updateConnectionStatus(true);
-  addMessageToHistory('Network connection restored', 'received');
+  addSystemLog('Network connection restored');
 });
 
 window.addEventListener('offline', function() {
   updateConnectionStatus(false);
-  addMessageToHistory('Network connection lost', 'received');
+  addSystemLog('Network connection lost');
 });
 
 // Performance optimization: debounce rapid key presses

@@ -112,16 +112,14 @@
       <section class="communication-section">
         <div class="card glass-card">
           <div class="card-header">
-            <h2><span class="icon">[RADIO]</span> Radio Communication</h2>
-            <div class="signal-strength" id="signalStrength">
-              <div class="signal-bar"></div>
-              <div class="signal-bar"></div>
-              <div class="signal-bar"></div>
-              <div class="signal-bar"></div>
+            <h2><span class="icon">[LOG]</span> System Status</h2>
+            <div class="status-indicator" id="systemStatus">
+              <div class="status-dot online"></div>
+              <span class="status-text">Active</span>
             </div>
           </div>
           
-          <div class="radio-container">
+          <div class="log-container">
             <div class="message-history" id="messageHistory">
               <div class="message received">
                 <span class="message-time">12:34</span>
@@ -129,12 +127,14 @@
               </div>
             </div>
             
-            <div class="radio-controls">
-              <div class="input-group">
-                <input type="text" id="radioInput" placeholder="Type your message..." class="radio-input">
-                <button class="send-btn" id="sendBtn">
-                  <span class="send-icon">→</span>
-                </button>
+            <div class="log-info">
+              <div class="info-item">
+                <span class="info-label">Obstacle Detection:</span>
+                <span class="info-value" id="obstacleStatus">Active</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Motor Status:</span>
+                <span class="info-value" id="motorStatus">Ready</span>
               </div>
             </div>
           </div>
@@ -157,6 +157,18 @@
                 <span class="telemetry-unit">cm</span>
               </div>
               <div class="telemetry-chart" id="distanceChart"></div>
+            </div>
+            
+            <div class="telemetry-item">
+              <div class="telemetry-icon">[IR]</div>
+              <div class="telemetry-content">
+                <span class="telemetry-label">IR Detection</span>
+                <span class="telemetry-value" id="irStatus">--</span>
+                <span class="telemetry-unit">status</span>
+              </div>
+              <div class="detection-indicator" id="irIndicator">
+                <div class="indicator-dot"></div>
+              </div>
             </div>
             
             <div class="telemetry-item">
@@ -232,7 +244,7 @@
         <div class="key-item"><kbd>A</kbd> or <kbd>←</kbd> Left</div>
         <div class="key-item"><kbd>D</kbd> or <kbd>→</kbd> Right</div>
         <div class="key-item"><kbd>Space</kbd> Stop</div>
-        <div class="key-item"><kbd>Enter</kbd> Send Message</div>
+
       </div>
       <button class="close-help" onclick="toggleKeyboardHelp()">×</button>
     </div>

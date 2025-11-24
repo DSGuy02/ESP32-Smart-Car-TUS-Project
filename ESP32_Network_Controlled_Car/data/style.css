@@ -537,11 +537,72 @@ body::before {
   background: var(--accent-green);
 }
 
-.radio-container {
+.log-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
   height: 300px;
+}
+
+.log-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid var(--border-glass);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: var(--accent-green);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(0, 255, 136, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.detection-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.indicator-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.detected {
+  background: var(--accent-red);
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+}
+
+.indicator-dot.clear {
+  background: var(--accent-green);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
 .message-history {
@@ -943,7 +1004,7 @@ kbd {
     max-width: 100%;
   }
   
-  .radio-container {
+  .log-container {
     height: 250px;
   }
   
