@@ -25,36 +25,54 @@ function moveReverse() {
 }
 
 function startBuzzer() {
-  fetch('/buzzer?state=on')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch('/buzzer?state=on', { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         document.getElementById('buzzerBtn').classList.add('active');
       }
     })
     .catch(error => {
-      console.error('Buzzer start failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('Buzzer start failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
 
 function stopBuzzer() {
-  fetch('/buzzer?state=off')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch('/buzzer?state=off', { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         document.getElementById('buzzerBtn').classList.remove('active');
       }
     })
     .catch(error => {
-      console.error('Buzzer stop failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('Buzzer stop failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
 
 function toggleLED1() {
-  fetch('/led1')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch('/led1', { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         const btn = document.getElementById('led1Btn');
@@ -66,14 +84,21 @@ function toggleLED1() {
       }
     })
     .catch(error => {
-      console.error('LED1 toggle failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('LED1 toggle failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
 
 function toggleLED2() {
-  fetch('/led2')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch('/led2', { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         const btn = document.getElementById('led2Btn');
@@ -85,14 +110,26 @@ function toggleLED2() {
       }
     })
     .catch(error => {
-      console.error('LED2 toggle failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('LED2 toggle failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
 
 function executeCommand(endpoint, direction) {
-  fetch(endpoint)
+  // Add timeout and optimize request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
+  
+  fetch(endpoint, {
+    method: 'GET',
+    signal: controller.signal,
+    cache: 'no-cache'
+  })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         highlightActiveButton(direction);
@@ -101,7 +138,10 @@ function executeCommand(endpoint, direction) {
       }
     })
     .catch(error => {
-      console.error('Command failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('Command failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
@@ -126,8 +166,13 @@ function highlightActiveButton(direction) {
 
 function updateMotorSpeed(pos) {
   document.getElementById('motorSpeed').innerHTML = pos + '%';
-  fetch(`/speed?value=${pos}`)
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch(`/speed?value=${pos}`, { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         // Add visual feedback for speed change
@@ -139,7 +184,10 @@ function updateMotorSpeed(pos) {
       }
     })
     .catch(error => {
-      console.error('Speed update failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('Speed update failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
@@ -174,8 +222,18 @@ function addMessageToHistory(message, type) {
 }
 
 function updateTelemetry() {
-  fetch('/telemetry')
-    .then(response => response.json())
+  // Add timeout for telemetry requests
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
+  
+  fetch('/telemetry', {
+    signal: controller.signal,
+    cache: 'no-cache'
+  })
+    .then(response => {
+      clearTimeout(timeoutId);
+      return response.json();
+    })
     .then(data => {
       // Update telemetry values with animations
       updateValueWithAnimation('distance', data.distance);
@@ -313,15 +371,22 @@ document.addEventListener('keydown', function(event) {
 });
 
 function toggleObstacleDetection() {
-  fetch('/obstacle-toggle')
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  
+  fetch('/obstacle-toggle', { signal: controller.signal, cache: 'no-cache' })
     .then(response => {
+      clearTimeout(timeoutId);
       if (response.ok) {
         updateConnectionStatus(true);
         addSystemLog('Obstacle detection toggled');
       }
     })
     .catch(error => {
-      console.error('Obstacle toggle failed:', error);
+      clearTimeout(timeoutId);
+      if (error.name !== 'AbortError') {
+        console.error('Obstacle toggle failed:', error);
+      }
       updateConnectionStatus(false);
     });
 }
@@ -428,9 +493,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Hide loading screen after initial load
   setTimeout(hideLoadingScreen, 1500);
   
-  // Start telemetry updates
+  // Start telemetry updates (reduced frequency for better performance)
   updateTelemetry();
-  setInterval(updateTelemetry, 1000);
+  setInterval(updateTelemetry, 2000);
   
   // Initialize system log with welcome message
   setTimeout(() => {

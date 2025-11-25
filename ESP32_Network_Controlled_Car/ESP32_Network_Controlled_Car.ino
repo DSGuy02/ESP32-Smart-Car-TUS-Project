@@ -114,16 +114,37 @@ void parseGPS() {
   }
 }
 
+// Cache distance reading to avoid blocking
+float lastDistance = 100.0;
+unsigned long lastDistanceTime = 0;
+
 bool checkForwardObstacle() {
   if (!obstacleDetectionEnabled) return false;
-  float distance = getDistance();
-  return distance <= 10.0; // Obstacle detected if distance <= 10cm
+  
+  // Only read distance every 100ms to avoid blocking
+  if (millis() - lastDistanceTime > 100) {
+    lastDistance = getDistance();
+    lastDistanceTime = millis();
+  }
+  
+  return lastDistance <= 10.0; // Obstacle detected if distance <= 10cm
 }
+
+// Cache IR reading
+int lastIrValue = 0;
+unsigned long lastIrTime = 0;
 
 bool checkBackwardObstacle() {
   if (!obstacleDetectionEnabled) return false;
-  irValue = analogRead(irSensorPin);
-  irDetected = irValue > 2000; // Adjust threshold as needed
+  
+  // Only read IR every 50ms
+  if (millis() - lastIrTime > 50) {
+    lastIrValue = analogRead(irSensorPin);
+    lastIrTime = millis();
+  }
+  
+  irValue = lastIrValue;
+  irDetected = irValue > 2000;
   return irDetected;
 }
 
@@ -242,15 +263,13 @@ void handleObstacleToggle() {
 }
 
 void handleTelemetry() {
-  float distance = getDistance();
-  irValue = analogRead(irSensorPin);
-  irDetected = irValue > 2000;
+  // Use cached values to avoid blocking
   bool forwardBlocked = checkForwardObstacle();
   bool backwardBlocked = checkBackwardObstacle();
   
-  String json = "{\"distance\":\"" + String(distance, 1) + 
+  String json = "{\"distance\":\"" + String(lastDistance, 1) + 
                 "\",\"wifi\":\"" + String(WiFi.RSSI()) + 
-                "\",\"irValue\":" + String(irValue) + 
+                "\",\"irValue\":" + String(lastIrValue) + 
                 ",\"irDetected\":" + (irDetected ? "true" : "false") + 
                 ",\"forwardBlocked\":" + (forwardBlocked ? "true" : "false") + 
                 ",\"backwardBlocked\":" + (backwardBlocked ? "true" : "false") + 
@@ -331,5 +350,15 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  parseGPS();
+  
+  // Parse GPS less frequently to reduce blocking
+  static unsigned long lastGpsTime = 0;
+  if (millis() - lastGpsTime > 200) {
+    parseGPS();
+    lastGpsTime = millis();
+  }
+  
+  // Update sensor readings in background
+  checkForwardObstacle();
+  checkBackwardObstacle();
 }
