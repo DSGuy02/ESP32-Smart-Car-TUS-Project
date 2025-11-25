@@ -62,12 +62,13 @@ A WiFi-controlled robot car with obstacle detection, radio communication, and re
 - **Operating Voltage**: 5V
 - **Trigger Pulse**: 10µs
 
-### IR Obstacle Sensor
-- **Detection Range**: 2cm - 30cm
+### HW-870 IR Obstacle Sensor
+- **Detection Range**: 3cm - 80cm (adjustable)
 - **Response Time**: <1ms
 - **Operating Voltage**: 3.3V-5V
-- **Interface**: Digital GPIO
+- **Interface**: Digital GPIO (HIGH = obstacle detected)
 - **Detection Angle**: 35°
+- **Sensitivity**: Adjustable via potentiometer
 
 ### NEO-M8N GPS Module
 - **Channels**: 72 acquisition, 22 tracking
@@ -115,7 +116,7 @@ ESP32 DevKit V1 Pin Layout:
               GPIO17──┤8          23├── GPIO19 (Buzzer)
               GPIO5 ──┤9          22├── GPIO18 (Echo)
               GPIO18──┤10         21├── GPIO5  (Trig)
-              GPIO19──┤11         20├── GPIO17 (IR Sensor)
+              GPIO19──┤11         20├── GPIO17 (HW-870 IR)
               GPIO21──┤12         19├── GPIO16
                GND ──┤13         18├── GPIO4  (GPS RX)
               GPIO22──┤14         17├── GPIO2  (GPS TX)
@@ -174,8 +175,8 @@ Motor Control Pins (not shown in layout above):
 └─────────────┘    └──────────────┘
 
 ┌─────────────┐    ┌──────────────┐
-│   ESP32     │    │ IR Obstacle  │
-│             │    │   Sensor     │
+│   ESP32     │    │   HW-870     │
+│             │    │ IR Obstacle  │
 │ GPIO17 ─────┼────┤OUT           │
 │ 5V ─────────┼────┤VCC           │
 │ GND ────────┼────┤GND           │
@@ -319,7 +320,7 @@ Movement Types:
 │  FORWARD    │    │  REVERSE    │
 │ M1: Forward │    │ M1: Reverse │
 │ M2: Forward │    │ M2: Reverse │
-│ Sensor: US  │    │ Sensor: IR  │
+│ Sensor: US  │    │ Sensor: HW-870 │
 └─────────────┘    └─────────────┘
 
 ┌─────────────┐    ┌─────────────┐
@@ -364,7 +365,7 @@ Movement Types:
 ### Interactive Telemetry Dashboard
 - **Animated Values**: Smooth value transitions with color feedback
 - **Forward Block Status**: Ultrasonic sensor monitoring (>10cm threshold)
-- **Backward Block Status**: IR sensor monitoring (analog threshold)
+- **Backward Block Status**: HW-870 IR sensor monitoring (digital detection)
 - **Obstacle Detection Status**: Master toggle status indicator
 - **WiFi Signal Bars**: Animated strength indicators
 - **GPS Visualization**: Satellite count with visual indicators
@@ -450,6 +451,14 @@ Movement Types:
 - Verify 5V power supply from ESP32 to HC-SR04
 - Ensure L298N is providing stable 5V output
 
+**HW-870 IR Sensor Issues**:
+- Check HW-870 wiring to GPIO17 (digital input)
+- Verify 5V power supply to HW-870
+- Adjust sensitivity potentiometer on HW-870 module
+- Test detection range (3-80cm adjustable)
+- Clean IR sensor lens
+- Ensure proper mounting angle
+
 **Web Interface Issues**:
 - Ensure filesystem uploaded with `./upload_fs.sh`
 - Check LittleFS mount in serial monitor
@@ -475,7 +484,8 @@ Movement Types:
 | **WiFi Range** | 50-100m (indoor) |
 | **Radio Range** | Up to 1000m (APC220) |
 | **GPS Accuracy** | 2.5m CEP (NEO-M8N) |
-| **Detection Range** | 2-400cm (HC-SR04) |
+| **Ultrasonic Range** | 2-400cm (HC-SR04) |
+| **IR Range** | 3-80cm (HW-870) |
 | **Motor Voltage** | 6-12V DC |
 | **Logic Voltage** | 5V (from L298N) |
 | **Operating Current** | ~1A (total) |

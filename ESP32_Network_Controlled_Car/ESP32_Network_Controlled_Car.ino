@@ -55,7 +55,7 @@ float distanceInch;
 
 String valueString = String(0);
 
-// IR Obstacle Sensor (Analog)
+// HW-870 IR Obstacle Sensor (Analog)
 const int irSensorPin = 17;
 int irValue = 0;
 bool irDetected = false;
@@ -144,7 +144,7 @@ bool checkBackwardObstacle() {
   }
   
   irValue = lastIrValue;
-  irDetected = irValue > 2000;
+  irDetected = irValue > 2000; // Adjust threshold as needed
   return irDetected;
 }
 
@@ -293,7 +293,7 @@ void setup() {
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  // IR sensor is analog, no pinMode needed for analog pins
+  // HW-870 IR sensor is analog, no pinMode needed for analog pins
   pinMode(buzzerPin, OUTPUT); // Sets the buzzerPin as an Output
   pinMode(led1Pin, OUTPUT); // Sets LED1 as an Output
   pinMode(led2Pin, OUTPUT); // Sets LED2 as an Output
