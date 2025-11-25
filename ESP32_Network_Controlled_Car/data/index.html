@@ -40,33 +40,28 @@
           <div class="movement-container">
             <div class="movement-grid">
               <button class="control-btn forward-btn" data-direction="forward">
-                <span class="btn-icon">↑</span>
                 <span class="btn-text">FORWARD</span>
                 <div class="btn-glow"></div>
               </button>
               
               <div class="side-controls">
                 <button class="control-btn left-btn" data-direction="left">
-                  <span class="btn-icon">←</span>
                   <span class="btn-text">LEFT</span>
                   <div class="btn-glow"></div>
                 </button>
                 
                 <button class="control-btn stop-btn" data-direction="stop">
-                  <span class="btn-icon">■</span>
                   <span class="btn-text">STOP</span>
                   <div class="btn-glow"></div>
                 </button>
                 
                 <button class="control-btn right-btn" data-direction="right">
-                  <span class="btn-icon">→</span>
                   <span class="btn-text">RIGHT</span>
                   <div class="btn-glow"></div>
                 </button>
               </div>
               
               <button class="control-btn reverse-btn" data-direction="reverse">
-                <span class="btn-icon">↓</span>
                 <span class="btn-text">REVERSE</span>
                 <div class="btn-glow"></div>
               </button>
@@ -75,10 +70,10 @@
             <div class="speed-control">
               <div class="speed-header">
                 <label>Motor Speed</label>
-                <span class="speed-value" id="motorSpeed">0%</span>
+                <span class="speed-value" id="motorSpeed">50%</span>
               </div>
               <div class="slider-container">
-                <input type="range" min="0" max="100" step="25" id="motorSlider" value="0"/>
+                <input type="range" min="0" max="100" step="25" id="motorSlider" value="50"/>
                 <div class="slider-track"></div>
                 <div class="speed-markers">
                   <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
@@ -102,6 +97,13 @@
               <button class="indicator-btn led-btn" id="led2Btn" onclick="toggleLED2()">
                 <span class="btn-icon">●</span>
                 <span class="btn-text">LED 2</span>
+                <div class="btn-glow"></div>
+              </button>
+            </div>
+            
+            <div class="obstacle-control">
+              <button class="obstacle-toggle-btn" id="obstacleToggleBtn" onclick="toggleObstacleDetection()">
+                <span class="btn-text">OBSTACLE DETECTION: ON</span>
                 <div class="btn-glow"></div>
               </button>
             </div>
@@ -160,13 +162,25 @@
             </div>
             
             <div class="telemetry-item">
-              <div class="telemetry-icon">[IR]</div>
+              <div class="telemetry-icon">[US]</div>
               <div class="telemetry-content">
-                <span class="telemetry-label">IR Detection</span>
-                <span class="telemetry-value" id="irStatus">--</span>
+                <span class="telemetry-label">Forward Block</span>
+                <span class="telemetry-value" id="forwardStatus">--</span>
                 <span class="telemetry-unit">status</span>
               </div>
-              <div class="detection-indicator" id="irIndicator">
+              <div class="detection-indicator" id="forwardIndicator">
+                <div class="indicator-dot"></div>
+              </div>
+            </div>
+            
+            <div class="telemetry-item">
+              <div class="telemetry-icon">[IR]</div>
+              <div class="telemetry-content">
+                <span class="telemetry-label">Backward Block</span>
+                <span class="telemetry-value" id="backwardStatus">--</span>
+                <span class="telemetry-unit">status</span>
+              </div>
+              <div class="detection-indicator" id="backwardIndicator">
                 <div class="indicator-dot"></div>
               </div>
             </div>

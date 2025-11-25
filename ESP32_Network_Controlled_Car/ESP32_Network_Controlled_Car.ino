@@ -55,9 +55,13 @@ float distanceInch;
 
 String valueString = String(0);
 
-// IR Obstacle Sensor
+// IR Obstacle Sensor (Analog)
 const int irSensorPin = 17;
+int irValue = 0;
 bool irDetected = false;
+
+// Master obstacle detection control
+bool obstacleDetectionEnabled = true;
 
 // NEO-M8N GPS Module
 HardwareSerial gpsSerial(1);
@@ -110,41 +114,41 @@ void parseGPS() {
   }
 }
 
-bool checkObstacles() {
+bool checkForwardObstacle() {
+  if (!obstacleDetectionEnabled) return false;
   float distance = getDistance();
-  irDetected = digitalRead(irSensorPin) == HIGH;
-  
-  // Return true if path is clear (distance > 10cm AND IR sensor clear)
-  return (distance > 10.0 && !irDetected);
+  return distance <= 10.0; // Obstacle detected if distance <= 10cm
+}
+
+bool checkBackwardObstacle() {
+  if (!obstacleDetectionEnabled) return false;
+  irValue = analogRead(irSensorPin);
+  irDetected = irValue > 2000; // Adjust threshold as needed
+  return irDetected;
 }
 
 
 
 void handleForward() {
-  if (checkObstacles()) {
+  if (checkForwardObstacle()) {
+    Serial.println("Ultrasonic obstacle detected - Forward blocked");
+    handleStop();
+  } else {
     Serial.println("Forward");
     digitalWrite(motor1Pin1, LOW);
     digitalWrite(motor1Pin2, HIGH); 
     digitalWrite(motor2Pin1, LOW);
     digitalWrite(motor2Pin2, HIGH);
-  } else {
-    Serial.println("Obstacle detected - Forward blocked");
-    handleStop();
   }
   server.send(200);
 }
 
 void handleLeft() {
-  if (checkObstacles()) {
-    Serial.println("Left");
-    digitalWrite(motor1Pin1, LOW); 
-    digitalWrite(motor1Pin2, LOW); 
-    digitalWrite(motor2Pin1, LOW);
-    digitalWrite(motor2Pin2, HIGH);
-  } else {
-    Serial.println("Obstacle detected - Left blocked");
-    handleStop();
-  }
+  Serial.println("Left");
+  digitalWrite(motor1Pin1, LOW); 
+  digitalWrite(motor1Pin2, LOW); 
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, HIGH);
   server.send(200);
 }
 
@@ -158,25 +162,25 @@ void handleStop() {
 }
 
 void handleRight() {
-  if (checkObstacles()) {
-    Serial.println("Right");
-    digitalWrite(motor1Pin1, LOW); 
-    digitalWrite(motor1Pin2, HIGH); 
-    digitalWrite(motor2Pin1, LOW);
-    digitalWrite(motor2Pin2, LOW);
-  } else {
-    Serial.println("Obstacle detected - Right blocked");
-    handleStop();
-  }
+  Serial.println("Right");
+  digitalWrite(motor1Pin1, LOW); 
+  digitalWrite(motor1Pin2, HIGH); 
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, LOW);
   server.send(200);
 }
 
 void handleReverse() {
-  Serial.println("Reverse");
-  digitalWrite(motor1Pin1, HIGH);
-  digitalWrite(motor1Pin2, LOW); 
-  digitalWrite(motor2Pin1, HIGH);
-  digitalWrite(motor2Pin2, LOW);
+  if (checkBackwardObstacle()) {
+    Serial.println("IR obstacle detected - Reverse blocked");
+    handleStop();
+  } else {
+    Serial.println("Reverse");
+    digitalWrite(motor1Pin1, HIGH);
+    digitalWrite(motor1Pin2, LOW); 
+    digitalWrite(motor2Pin1, HIGH);
+    digitalWrite(motor2Pin2, LOW);
+  }
   server.send(200);
 }
 
@@ -231,15 +235,26 @@ void handleLED2() {
   server.send(200);
 }
 
+void handleObstacleToggle() {
+  obstacleDetectionEnabled = !obstacleDetectionEnabled;
+  Serial.println(obstacleDetectionEnabled ? "Obstacle detection ENABLED" : "Obstacle detection DISABLED");
+  server.send(200);
+}
+
 void handleTelemetry() {
   float distance = getDistance();
-  irDetected = digitalRead(irSensorPin) == HIGH;
-  bool obstacleDetected = !checkObstacles();
+  irValue = analogRead(irSensorPin);
+  irDetected = irValue > 2000;
+  bool forwardBlocked = checkForwardObstacle();
+  bool backwardBlocked = checkBackwardObstacle();
   
   String json = "{\"distance\":\"" + String(distance, 1) + 
                 "\",\"wifi\":\"" + String(WiFi.RSSI()) + 
-                "\",\"irDetected\":" + (irDetected ? "true" : "false") + 
-                ",\"obstacleDetected\":" + (obstacleDetected ? "true" : "false") + 
+                "\",\"irValue\":" + String(irValue) + 
+                ",\"irDetected\":" + (irDetected ? "true" : "false") + 
+                ",\"forwardBlocked\":" + (forwardBlocked ? "true" : "false") + 
+                ",\"backwardBlocked\":" + (backwardBlocked ? "true" : "false") + 
+                ",\"obstacleDetectionEnabled\":" + (obstacleDetectionEnabled ? "true" : "false") + 
                 ",\"motorStatus\":\"Ready\"" +
                 ",\"latitude\":\"" + String(latitude, 6) + 
                 "\",\"longitude\":\"" + String(longitude, 6) + 
@@ -259,7 +274,7 @@ void setup() {
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  pinMode(irSensorPin, INPUT); // Sets the IR sensor as an Input
+  // IR sensor is analog, no pinMode needed for analog pins
   pinMode(buzzerPin, OUTPUT); // Sets the buzzerPin as an Output
   pinMode(led1Pin, OUTPUT); // Sets LED1 as an Output
   pinMode(led2Pin, OUTPUT); // Sets LED2 as an Output
@@ -274,9 +289,9 @@ void setup() {
   ledcAttach(enable1Pin, freq, resolution);
   ledcAttach(enable2Pin, freq, resolution);
     
-  // Initialize PWM with 0 duty cycle
-  ledcWrite(enable1Pin, 100);
-  ledcWrite(enable2Pin, 100);
+  // Initialize PWM with default duty cycle
+  ledcWrite(enable1Pin, 200);
+  ledcWrite(enable2Pin, 200);
   
   // Connect to Wi-Fi
   Serial.print("Connecting to ");
@@ -307,6 +322,7 @@ void setup() {
   server.on("/buzzer", handleBuzzer);
   server.on("/led1", handleLED1);
   server.on("/led2", handleLED2);
+  server.on("/obstacle-toggle", handleObstacleToggle);
   server.on("/telemetry", handleTelemetry);
 
   // Start the server

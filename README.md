@@ -283,16 +283,31 @@ Movement Request
        │
        ▼
 ┌─────────────┐
-│Get Distance │
-│from Sensor  │
+│Check Master │
+│Toggle       │
 └──────┬──────┘
        │
        ▼
-┌─────────────┐     YES    ┌─────────────┐
-│Distance >   │───────────▶│Execute      │
-│10cm?        │            │Movement     │
-└──────┬──────┘            └─────────────┘
-       │ NO
+┌─────────────┐     DISABLED   ┌─────────────┐
+│Obstacle     │───────────────▶│Execute      │
+│Detection    │                │Movement     │
+│Enabled?     │                └─────────────┘
+└──────┬──────┘
+       │ ENABLED
+       ▼
+┌─────────────┐
+│Check Sensor │
+│for Direction│
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐     CLEAR     ┌─────────────┐
+│Forward:     │──────────────▶│Execute      │
+│Ultrasonic   │               │Movement     │
+│Backward:    │               └─────────────┘
+│IR Sensor    │
+└──────┬──────┘
+       │ BLOCKED
        ▼
 ┌─────────────┐
 │Stop Motors  │
@@ -304,12 +319,14 @@ Movement Types:
 │  FORWARD    │    │  REVERSE    │
 │ M1: Forward │    │ M1: Reverse │
 │ M2: Forward │    │ M2: Reverse │
+│ Sensor: US  │    │ Sensor: IR  │
 └─────────────┘    └─────────────┘
 
 ┌─────────────┐    ┌─────────────┐
 │    LEFT     │    │   RIGHT     │
 │ M1: Stop    │    │ M1: Forward │
 │ M2: Forward │    │ M2: Stop    │
+│ No Blocking │    │ No Blocking │
 └─────────────┘    └─────────────┘
 ```
 
@@ -323,14 +340,15 @@ Movement Types:
 - **Smooth Animations**: 3D hover effects, transitions, and micro-interactions
 
 ### Enhanced Control Methods
-- **Interactive Buttons**: 3D styled buttons with glow effects and haptic feedback
+- **Interactive Buttons**: Clean text-based movement controls without emojis
 - **Buzzer Button**: Dedicated press-and-hold buzzer control with visual feedback
 - **LED Controls**: Toggle buttons for two independent LED indicators
+- **Obstacle Detection Toggle**: Master control to enable/disable all obstacle detection
 - **Keyboard Shortcuts**: 
-  - W/↑ = Forward
-  - S/↓ = Reverse  
-  - A/← = Left
-  - D/→ = Right
+  - W/↑ = Forward (blocked by ultrasonic sensor)
+  - S/↓ = Reverse (blocked by IR sensor)
+  - A/← = Left (no blocking)
+  - D/→ = Right (no blocking)
   - Spacebar = Stop
 - **Custom Speed Slider**: Animated slider with visual markers
 - **Visual Feedback**: Button highlighting and active state indicators
@@ -345,7 +363,9 @@ Movement Types:
 
 ### Interactive Telemetry Dashboard
 - **Animated Values**: Smooth value transitions with color feedback
-- **Distance Monitoring**: Real-time obstacle detection with visual alerts
+- **Forward Block Status**: Ultrasonic sensor monitoring (>10cm threshold)
+- **Backward Block Status**: IR sensor monitoring (analog threshold)
+- **Obstacle Detection Status**: Master toggle status indicator
 - **WiFi Signal Bars**: Animated strength indicators
 - **GPS Visualization**: Satellite count with visual indicators
 - **Connection Monitoring**: Network status with automatic reconnection

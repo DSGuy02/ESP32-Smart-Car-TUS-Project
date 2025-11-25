@@ -184,11 +184,11 @@ function updateTelemetry() {
       updateValueWithAnimation('gpsLon', data.longitude);
       updateValueWithAnimation('gpsSats', data.satellites);
       
-      // Update IR sensor status
-      updateIRStatus(data.irDetected);
+      // Update obstacle detection status
+      updateObstacleStatus(data);
       
       // Update system status
-      updateSystemStatus(data.obstacleDetected, data.motorStatus);
+      updateSystemStatus(data.motorStatus);
       
       // Update GPS status
       updateGPSStatus(data.gpsStatus, parseInt(data.satellites));
@@ -312,27 +312,54 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-function updateIRStatus(detected) {
-  const irStatus = document.getElementById('irStatus');
-  const irIndicator = document.querySelector('.indicator-dot');
+function toggleObstacleDetection() {
+  fetch('/obstacle-toggle')
+    .then(response => {
+      if (response.ok) {
+        updateConnectionStatus(true);
+        addSystemLog('Obstacle detection toggled');
+      }
+    })
+    .catch(error => {
+      console.error('Obstacle toggle failed:', error);
+      updateConnectionStatus(false);
+    });
+}
+
+function updateObstacleStatus(data) {
+  // Update forward obstacle status
+  const forwardStatus = document.getElementById('forwardStatus');
+  const forwardIndicator = document.querySelector('#forwardIndicator .indicator-dot');
   
-  if (detected) {
-    irStatus.textContent = 'Detected';
-    irIndicator.className = 'indicator-dot detected';
+  if (forwardStatus && forwardIndicator) {
+    forwardStatus.textContent = data.forwardBlocked ? 'Blocked' : 'Clear';
+    forwardIndicator.className = data.forwardBlocked ? 'indicator-dot detected' : 'indicator-dot clear';
+  }
+  
+  // Update backward obstacle status
+  const backwardStatus = document.getElementById('backwardStatus');
+  const backwardIndicator = document.querySelector('#backwardIndicator .indicator-dot');
+  
+  if (backwardStatus && backwardIndicator) {
+    backwardStatus.textContent = data.backwardBlocked ? 'Blocked' : 'Clear';
+    backwardIndicator.className = data.backwardBlocked ? 'indicator-dot detected' : 'indicator-dot clear';
+  }
+  
+  // Update obstacle detection toggle button
+  const toggleBtn = document.getElementById('obstacleToggleBtn');
+  const toggleText = toggleBtn.querySelector('.btn-text');
+  
+  if (data.obstacleDetectionEnabled) {
+    toggleBtn.className = 'obstacle-toggle-btn enabled';
+    toggleText.textContent = 'OBSTACLE DETECTION: ON';
   } else {
-    irStatus.textContent = 'Clear';
-    irIndicator.className = 'indicator-dot clear';
+    toggleBtn.className = 'obstacle-toggle-btn disabled';
+    toggleText.textContent = 'OBSTACLE DETECTION: OFF';
   }
 }
 
-function updateSystemStatus(obstacleDetected, motorStatus) {
-  const obstacleStatusEl = document.getElementById('obstacleStatus');
+function updateSystemStatus(motorStatus) {
   const motorStatusEl = document.getElementById('motorStatus');
-  
-  if (obstacleStatusEl) {
-    obstacleStatusEl.textContent = obstacleDetected ? 'Obstacle Detected' : 'Path Clear';
-    obstacleStatusEl.style.color = obstacleDetected ? 'var(--accent-red)' : 'var(--accent-green)';
-  }
   
   if (motorStatusEl) {
     motorStatusEl.textContent = motorStatus || 'Ready';
@@ -354,6 +381,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+  
+  // Speed slider handler
+  const motorSlider = document.getElementById('motorSlider');
+  if (motorSlider) {
+    motorSlider.addEventListener('input', function() {
+      updateMotorSpeed(this.value);
+    });
+    // Set initial speed
+    updateMotorSpeed(motorSlider.value);
+  }
   
   // System status updates are handled in telemetry
   
