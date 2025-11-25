@@ -336,12 +336,18 @@ function updateSatelliteVisual(count) {
   }
 }
 
-// Enhanced keyboard controls with visual feedback
+// Enhanced keyboard controls with hold-to-move functionality
+let keysPressed = new Set();
+
 document.addEventListener('keydown', function(event) {
   // Prevent default for space and arrow keys
-  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(event.key)) {
     event.preventDefault();
   }
+  
+  // Prevent key repeat
+  if (keysPressed.has(event.key)) return;
+  keysPressed.add(event.key);
   
   switch(event.key) {
     case 'ArrowUp':
@@ -367,6 +373,15 @@ document.addEventListener('keydown', function(event) {
     case ' ':
       stopRobot();
       break;
+  }
+});
+
+document.addEventListener('keyup', function(event) {
+  keysPressed.delete(event.key);
+  
+  // Stop movement when key is released (except spacebar which is already stop)
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(event.key)) {
+    stopRobot();
   }
 });
 
@@ -431,18 +446,59 @@ function updateSystemStatus(motorStatus) {
   }
 }
 
-// Add click handlers for control buttons
+// Add hold-to-move handlers for control buttons
 document.addEventListener('DOMContentLoaded', function() {
-  // Control button handlers
+  // Control button handlers - hold to move, release to stop
   document.querySelectorAll('.control-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const direction = this.dataset.direction;
-      switch(direction) {
-        case 'forward': moveForward(); break;
-        case 'left': moveLeft(); break;
-        case 'right': moveRight(); break;
-        case 'reverse': moveReverse(); break;
-        case 'stop': stopRobot(); break;
+    const direction = btn.dataset.direction;
+    
+    // Mouse events
+    btn.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      if (direction === 'stop') {
+        stopRobot();
+      } else {
+        switch(direction) {
+          case 'forward': moveForward(); break;
+          case 'left': moveLeft(); break;
+          case 'right': moveRight(); break;
+          case 'reverse': moveReverse(); break;
+        }
+      }
+    });
+    
+    btn.addEventListener('mouseup', function(e) {
+      e.preventDefault();
+      if (direction !== 'stop') {
+        stopRobot();
+      }
+    });
+    
+    btn.addEventListener('mouseleave', function(e) {
+      if (direction !== 'stop') {
+        stopRobot();
+      }
+    });
+    
+    // Touch events for mobile
+    btn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      if (direction === 'stop') {
+        stopRobot();
+      } else {
+        switch(direction) {
+          case 'forward': moveForward(); break;
+          case 'left': moveLeft(); break;
+          case 'right': moveRight(); break;
+          case 'reverse': moveReverse(); break;
+        }
+      }
+    });
+    
+    btn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      if (direction !== 'stop') {
+        stopRobot();
       }
     });
   });
@@ -552,15 +608,32 @@ function addHapticFeedback() {
   }
 }
 
-// Enhanced button interactions
+// Enhanced button interactions with hold-to-move visual feedback
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.control-btn').forEach(btn => {
     btn.addEventListener('touchstart', addHapticFeedback);
+    
     btn.addEventListener('mousedown', function() {
       this.style.transform = 'translateY(-1px) scale(0.98)';
+      this.classList.add('active');
     });
+    
     btn.addEventListener('mouseup', function() {
       this.style.transform = '';
+      this.classList.remove('active');
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+      this.classList.remove('active');
+    });
+    
+    btn.addEventListener('touchstart', function() {
+      this.classList.add('active');
+    });
+    
+    btn.addEventListener('touchend', function() {
+      this.classList.remove('active');
     });
   });
 });
